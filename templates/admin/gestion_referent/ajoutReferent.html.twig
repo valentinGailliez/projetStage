@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+	{{ include ("navBar/navbar.html.twig") }}
+
+	<h1>Ajout d'un référent</h1>
+	{{ form_start(form)}}
+
+	{{ form_row(form.nom)}}
+	{{ form_row(form.prenom)}}
+	{{ form_row(form.telephone)}}
+	{{ form_row(form.mot_de_passe)}}
+
+	<button type="submit" class="btn btn-primary">Ajouter Etudiant</button>
+
+	{{ form_end (form)}}
+{% endblock %}

@@ -1,0 +1,30 @@
+index:
+    path: /
+    controller: App\Controller\ConnexionController::index
+
+home:
+    path: /{role}/{Utilisateur}
+    controller: App\Controller\HomeController::index
+
+etudiantManuellement:
+    path: /{role}/{Utilisateur}/etudiant/ajout
+    controller: App\Controller\Admin\GestionEtudiantController::ajout
+
+etudiantImport:
+    path: /{role}/{Utilisateur}/etudiant/import
+    controller: App\Controller\Admin\GestionEtudiantController::import
+
+etudiantListe:
+    path: /{role}/{Utilisateur}/etudiant
+    controller: App\Controller\Admin\GestionEtudiantController::ListeEtudiant
+
+referentAjout:
+    path: /{role}/{Utilisateur}/referent/ajout
+    controller: App\Controller\Admin\GestionReferentController::ajout
+
+
+
+referentListe:
+    path: /{role}/{Utilisateur}/referent
+    controller: App\Controller\Admin\GestionReferentController::ListeReferent
+

@@ -1,0 +1,28 @@
+<html>
+	<head>
+		{% block title %}
+			Connexion
+		{% endblock %}
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	</head>
+	{% block body %}
+		<div class="container">
+			<div class="row">
+				{{ form_start(form, {
+                'attr': {
+                    'novalidate': 'novalidate',
+                    'class': 'col-lg-5' 
+                    }
+                })
+            }}
+
+				{{ form_row(form.email) }}
+				{{ form_row(form.mot_de_passe) }}
+
+				<button type="submit" class="btn btn-primary">Se connecter</button>
+				{{ form_end(form) }}
+			</div>
+		</div>
+	{% endblock %}
+</html>

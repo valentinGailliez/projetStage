@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+	{{ include ("navBar/navbar.html.twig") }}
+
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Firstname</th>
+				<th>Lastname</th>
+				<th>Matricule</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for etudiant in etudiants %}
+				<tr>
+					<td>{{etudiant.nom}}</td>
+					<td>{{etudiant.prenom}}</td>
+					<td>{{etudiant.matricule}}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</tr>
+</table>{% endblock %}
