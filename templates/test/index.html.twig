@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Création skill et subskill
+{% endblock %}
+{% block body %}
+	<h1>Compétence</h1>
+	{{ form_start(form) }}
+	Nom de la compétence :
+	{{ form_widget(form.name)}}
+	Numéro de Compétence :
+	{{ form_widget(form.skillNumber)}}
+	Section :
+	{{ form_widget(form.section)}}
+
+
+	<button type="submit">Créer compétence</button>
+
+{% endblock %}
