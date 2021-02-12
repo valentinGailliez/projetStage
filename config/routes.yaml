@@ -12,7 +12,7 @@ createSkill:
 
 accueilSkill:
     path: /skill
-    controller: App\Controller\SkillController::index
+    controller: App\Controller\SkillController::getListSkill
 
 createSubSkill:
     path: /subskill/{id}/create
