@@ -21,6 +21,8 @@
 			<td>Numéro
 				de
 				compétence</td>
+			<td>
+			Commentaire</td>
 			<td>Voir
 				les
 				sous-compétences</td>
@@ -42,6 +44,20 @@
 					<td>{{skill.section}}</td>
 					<td>{{skill.skillNumber}}</td>
 					<td>
+						{% if skill.comments != null %}
+							{{skill.comments}}
+						{% else %}
+							<i>
+								<b>
+									<u>
+										PAS DE
+										COMMENTAIRE
+									</u>
+								</b>
+							</i>
+						{% endif %}
+					</td>
+					<td>
 						<a class="btn btn-secondary" href="{{path('accueilSubSkill',{'id' : skill.id})}}">
 							voir la
 							liste des
@@ -55,15 +71,13 @@
 					</td>
 					<td>
 						<a class='btn btn-danger' href="{{path('deleteSkill',{'id':skill.id})}}">
-						Supprimer
-						la
-						compétence</a>
+							Supprimer
+							la
+							compétence</a>
 					</td>
 				</tr>
 			{% endfor %}
 		</tbody>
-	</tbody>
-</table>
-<a class="btn btn-warning" href="{{path('createSkill')}}">
-	creer une
+	</tr>
+</tbody></tbody></table><a class="btn btn-warning" href="{{path('createSkill')}}">creer une
 	compétence</a>{% endblock %}
