@@ -2,7 +2,18 @@ index:
     path: /
     controller: App\Controller\IndexController::index
 
-testSubSkill:
-    path: /subskillTest/{id}
-    controller: App\Controller\TestController::getSubSkill
+accueilSubSkill:
+    path: /subskill/{id}
+    controller: App\Controller\SubSkillController::getSubSkill
 
+createSkill:
+    path: /skill/create
+    controller: App\Controller\TestController::createSkill
+
+accueilSkill:
+    path: /skill
+    controller: App\Controller\TestController::index
+
+createSubSkill:
+    path: /subskill/{id}/create
+    controller: App\Controller\SubSkillController::createSubSkill

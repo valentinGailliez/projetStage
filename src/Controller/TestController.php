@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use DOMDocument;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\SkillFormType;
 use App\Form\SubSkillFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,6 +15,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class TestController extends AbstractController
 {
+    private $em;
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->em = $entityManager;
+    }
     /**
      * @Route("/test", name="test")
      */
@@ -32,7 +39,6 @@ class TestController extends AbstractController
 
     public function getListSkill($listSkill): Response
     {
-
         return $this->render('test/listSkill.html.twig', [
             'skills' => $listSkill
         ]);
@@ -40,7 +46,7 @@ class TestController extends AbstractController
 
     public function createSkill(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+
 
         $skill = new Skill();
         $form = $this->createForm(SkillFormType::class, $skill);
@@ -48,9 +54,10 @@ class TestController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            $em->persist($skill);
-            $em->flush();
-            $this->index($request);
+            $this->em->persist($skill);
+            $this->em->flush();
+            $this->addFlash("success", "La compétence a bien été créée.");
+            return $this->redirectToRoute("accueilSkill");
         }
         return $this->render('test/index.html.twig', [
             'form' => $form->createView()

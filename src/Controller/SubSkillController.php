@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Skill;
 use App\Entity\SubSkill;
+use App\Form\SubSkillFormType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,17 +19,25 @@ class SubSkillController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $id = $request->get("id");
-        //$repository = $this->getDoctrine()->getRepository(SubSkill::class);
-        //$subSkills = $repository->findBy(['skill' => $id]);
+
+        $skill = $em->getRepository(Skill::class)->findOneBy(['id' => $id]);
+
         $subSkills = $em->getRepository(SubSkill::class)->findBy(['skill' => $id]);
         if ($subSkills == null) {
-            return $this->createSubSkill($request);
+            return $this->createSubSkill($request, true);
         }
-        return $this->render('test/listSubSkill.html.twig');
+        return $this->render('sub_skill/listSubSkill.html.twig', [
+            'subskills' => $subSkills,
+            'skill' => $skill
+        ]);
     }
-    public function createSubSkill(Request $request): Response
+    public function createSubSkill(Request $request, Bool $isNew): Response
     {
+        if ($isNew == null) {
+            $isNew = true;
+        }
         $em = $this->getDoctrine()->getManager();
+        $skill = $em->getRepository(Skill::class)->findOneBy(['id' => $request->get('id')]);
 
         $subSkill = new SubSkill();
 
@@ -36,12 +46,18 @@ class SubSkillController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            $subSkill->setSkill($skill);
+
             $em->persist($subSkill);
             $em->flush();
-            $this->getSubSkill($request);
+            return $this->redirectToRoute("accueilSubSkill", [
+                'id' => $request->get('id')
+            ]);
         }
-        return $this->render('test/createSubSkill.html.twig', [
-            'form' => $form->createView()
+        return $this->render('sub_skill/createSubSkill.html.twig', [
+            'form' => $form->createView(),
+            'skill' => $skill,
+            'new' => $isNew
         ]);
     }
 }

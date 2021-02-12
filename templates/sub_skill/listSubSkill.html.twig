@@ -1,40 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}listes compétence
+{% block title %}listes sous compétence
 {% endblock %}
 {% block body %}
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-	{% for message in app.flashes("success") %}
-		<div class="alert alert-success">{{message}}</div>
-	{% endfor %}
+	<h1>Compétence :
+		<br>
+		{{skill.name}}
+	</h1>
 	<table class="table table-striped">
 		<thead>
 			<td>Name</td>
 			<td>Section</td>
 			<td>Number</td>
-			<td>View SubSkill</td>
-			<td>Edit Skill</td>
 			<td></td>
 		</thead>
 
 		<tbody>
-			{% for skill in skills%}
+			{% for subskill in subskills%}
 				<tr>
-					<td>{{skill.name}}</td>
+					<td>{{subskill.name}}</td>
 					<td>{{skill.section}}</td>
-					<td>{{skill.skillNumber}}</td>
-					<td>
-						<a href="{{path('accueilSubSkill',{'id' : skill.id})}}">Ajouter sous-compétence</a>
-					</td>
+					<td>{{subskill.number}}</td>
+
 				</tr>
 			{% endfor %}
 		</tbody>
 	</tbody>
 
 </table>
-<form id="form" action="{{path('createSkill')}}">
-	<button type="submit" id="btnSubmit" class="btn btn-primary">Ajouter compétence</button>
+<form id="form" action="{{path('createSubSkill',{'id' : skill.id})}}">
+	<button type="submit" id="btnSubmit" class="btn btn-secondary">Ajouter sous-compétence</button>
+</form>
+<form id="form" action="{{path('accueilSkill')}}">
+	<button type="submit" class="btn btn-primary">Revenir à la liste des compétences</button>
 </form>{% endblock %}
