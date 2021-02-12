@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\SubSkillFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,17 +13,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class SubSkillController extends AbstractController
 {
+
+    private $em;
+    public function __construct(EntityManagerInterface $entityManagerInterface)
+    {
+        $this->em = $entityManagerInterface;
+    }
     /**
      * @Route("/sub/skill", name="sub_skill")
      */
     public function getSubSkill(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+
         $id = $request->get("id");
 
-        $skill = $em->getRepository(Skill::class)->findOneBy(['id' => $id]);
+        $skill = $this->em->getRepository(Skill::class)->findOneBy(['id' => $id]);
 
-        $subSkills = $em->getRepository(SubSkill::class)->findBy(['skill' => $id]);
+        $subSkills = $this->em->getRepository(SubSkill::class)->findBy(['skill' => $id]);
         if ($subSkills == null) {
             return $this->createSubSkill($request, true);
         }
@@ -31,13 +38,15 @@ class SubSkillController extends AbstractController
             'skill' => $skill
         ]);
     }
-    public function createSubSkill(Request $request, Bool $isNew): Response
+    public function createSubSkill(Request $request): Response
     {
-        if ($isNew == null) {
+        $listSubSkill = $this->em->getRepository(SubSkill::class)->findBy(['skill' => $request->get('id')]);
+        if ($listSubSkill == null) {
             $isNew = true;
+        } else {
+            $isNew = false;
         }
-        $em = $this->getDoctrine()->getManager();
-        $skill = $em->getRepository(Skill::class)->findOneBy(['id' => $request->get('id')]);
+        $skill = $this->em->getRepository(Skill::class)->findOneBy(['id' => $request->get('id')]);
 
         $subSkill = new SubSkill();
 
@@ -45,11 +54,11 @@ class SubSkillController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $subSkill->setSkill($skill);
 
-            $em->persist($subSkill);
-            $em->flush();
+            $this->em->persist($subSkill);
+            $this->em->flush();
             return $this->redirectToRoute("accueilSubSkill", [
                 'id' => $request->get('id')
             ]);
@@ -58,6 +67,42 @@ class SubSkillController extends AbstractController
             'form' => $form->createView(),
             'skill' => $skill,
             'new' => $isNew
+        ]);
+    }
+
+    public function deleteSubSkill(Request $request)
+    {
+        $subskill = $this->em->getRepository(SubSkill::class)->findOneBy(['id' => $request->get('idSubSkill')]);
+        $this->em->remove($subskill);
+        $this->em->flush();
+
+
+        return $this->redirectToRoute("accueilSubSkill", [
+            'id' => $request->get('id')
+
+        ]);
+    }
+
+    public function updateSubSkill(Request $request)
+    {
+        $subSkill = $this->em->getRepository(SubSkill::class)->findOneBy(['id' => $request->get('idSubSkill')]);
+        $form = $this->createForm(SubSkillFormType::class, $subSkill);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+
+            $this->em->flush();
+            return $this->redirectToRoute("accueilSubSkill", [
+                'id' => $request->get('id')
+            ]);
+        }
+        return $this->render('sub_skill/updateSubSkill.html.twig', [
+            'form' => $form->createView(),
+
+
         ]);
     }
 }

@@ -1,39 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}listes sous compétence
+{% block title %}
+	listes
+	sous
+	compétence
 {% endblock %}
 {% block body %}
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-	<h1>Compétence :
-		<br>
-		{{skill.name}}
-	</h1>
-	<table class="table table-striped">
-		<thead>
-			<td>Name</td>
-			<td>Section</td>
-			<td>Number</td>
-			<td></td>
-		</thead>
+	<div class="container">
+		<h1>
+			Compétence
+			:
+			<br>
+			{{skill.name}}
+		</h1>
+		<table class="table
+				table-striped">
+			<thead>
+				<td>Name</td>
+				<td>Section</td>
+				<td>Number</td>
+				<td>
+					Modifier
+					la
+					sous-compétence</td>
+				<td>
+					Supprimer
+					la
+					sous-compétence</td>
+			</thead>
 
-		<tbody>
-			{% for subskill in subskills%}
-				<tr>
-					<td>{{subskill.name}}</td>
-					<td>{{skill.section}}</td>
-					<td>{{subskill.number}}</td>
-
-				</tr>
-			{% endfor %}
+			<tbody>
+				{% for subskill in subskills%}
+					<tr>
+						<td>{{subskill.name}}</td>
+						<td>{{skill.section}}</td>
+						<td>{{subskill.number}}</td>
+						<td>
+							<a class="btn btn-warning" href="{{path('updateSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
+								Modifier
+								la
+								sous-compétence</a>
+						</td>
+						<td>
+							<a class="btn btn-danger" href="{{path('deleteSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
+								Supprimer
+								sous-compétence</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
 		</tbody>
-	</tbody>
 
-</table>
-<form id="form" action="{{path('createSubSkill',{'id' : skill.id})}}">
-	<button type="submit" id="btnSubmit" class="btn btn-secondary">Ajouter sous-compétence</button>
-</form>
-<form id="form" action="{{path('accueilSkill')}}">
-	<button type="submit" class="btn btn-primary">Revenir à la liste des compétences</button>
-</form>{% endblock %}
+	</table>
+	<br><hr>
+	<a class="btn btn-primary" href="{{path('createSubSkill',{'id':skill.id})}}">
+		Ajouter
+		sous
+		compétence</a>
+	<a class="btn btn-secondary" href="{{path('accueilSkill')}}">
+		Revenir à
+		la liste
+		des
+		compétences</a>
+</div>{% endblock %}

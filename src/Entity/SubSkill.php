@@ -3,8 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SubSkillRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -21,11 +20,13 @@ class SubSkill
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank
      */
     private $number;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank
      */
     private $name;
 

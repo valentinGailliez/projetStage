@@ -8,12 +8,21 @@ accueilSubSkill:
 
 createSkill:
     path: /skill/create
-    controller: App\Controller\TestController::createSkill
+    controller: App\Controller\SkillController::createSkill
 
 accueilSkill:
     path: /skill
-    controller: App\Controller\TestController::index
+    controller: App\Controller\SkillController::index
 
 createSubSkill:
     path: /subskill/{id}/create
     controller: App\Controller\SubSkillController::createSubSkill
+
+deleteSubSkill:
+    path: /subskill/{id}/delete/{idSubSkill}
+    controller: App\Controller\SubSkillController::deleteSubSkill
+
+updateSubSkill:
+    path: /subskill/{id}/update/{idSubSkill}
+    controller: App\Controller\SubSkillController::updateSubSkill
+

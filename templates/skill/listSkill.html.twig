@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	listes
+	compétence
+{% endblock %}
+{% block body %}
+	<div class="btn-toolbar
+			mb-2
+			mb-md-0">
+		<h1>Liste
+			de
+			compétences</div>
+	</div>
+	<table class="table
+			table-striped">
+		<thead>
+			<td>Nom de
+				compétence</td>
+			<td>Section</td>
+			<td>Numéro
+				de
+				compétence</td>
+			<td>Voir
+				les
+				sous-compétences</td>
+			<td>
+				Modifier
+				la
+				compétence
+			</td>
+			<td></td>
+		</thead>
+
+		<tbody>
+			{% for skill in skills%}
+				<tr>
+					<td>{{skill.name}}</td>
+					<td>{{skill.section}}</td>
+					<td>{{skill.skillNumber}}</td>
+					<td>
+						<a class="btn btn-secondary" href="{{path('accueilSubSkill',{'id' : skill.id})}}">
+							voir la
+							liste des
+							sous-compétence</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</tbody>
+</table>
+<a class="btn btn-warning" href="{{path('createSkill')}}">
+	creer une
+	compétence</a>{% endblock %}

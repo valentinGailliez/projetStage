@@ -2,33 +2,27 @@
 
 namespace App\Controller;
 
-use DOMDocument;
 use App\Entity\Skill;
-use App\Entity\SubSkill;
 use App\Form\SkillFormType;
-use App\Form\SubSkillFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class TestController extends AbstractController
+class SkillController extends AbstractController
 {
     private $em;
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
     }
-    /**
-     * @Route("/test", name="test")
-     */
+
     public function index(Request $request): Response
     {
         $repository = $this->getDoctrine()->getRepository(Skill::class);
         $listSkill = $repository->findAll();
         if ($listSkill == null) {
-            return $this->createSkill($request);
+            return $this->createSkill($request, true);
         } else {
             return $this->getListSkill($listSkill);
         }
@@ -39,7 +33,7 @@ class TestController extends AbstractController
 
     public function getListSkill($listSkill): Response
     {
-        return $this->render('test/listSkill.html.twig', [
+        return $this->render('skill/listSkill.html.twig', [
             'skills' => $listSkill
         ]);
     }
@@ -53,13 +47,13 @@ class TestController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($skill);
             $this->em->flush();
             $this->addFlash("success", "La compétence a bien été créée.");
             return $this->redirectToRoute("accueilSkill");
         }
-        return $this->render('test/index.html.twig', [
+        return $this->render('skill/createSkill.html.twig', [
             'form' => $form->createView()
         ]);
     }
