@@ -53,11 +53,20 @@ class SkillController extends AbstractController
 
         $form->handleRequest($request);
 
+        $validator = true;
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($skill);
-            $this->em->flush();
-            $this->addFlash("success", "La compétence a bien été créée.");
-            return $this->redirectToRoute("accueilSkill");
+            foreach ($listSkill as $elementSkill) {
+                if ($elementSkill->getSkillNumber() == $skill->getSkillNumber()  && $elementSkill->getSection() == $skill->getSection() && !($elementSkill->getId() == $skill->getId())) {
+                    $validator = false;
+                    $this->addFlash("danger", "Cette identifiant de compétence est déjà attribué pour cette section");
+                }
+            }
+            if ($validator == true) {
+                $this->em->persist($skill);
+                $this->em->flush();
+                $this->addFlash("success", "La compétence a bien été créée.");
+                return $this->redirectToRoute("accueilSkill");
+            }
         }
         return $this->render('skill/createSkill.html.twig', [
             'form' => $form->createView(),
@@ -67,18 +76,27 @@ class SkillController extends AbstractController
 
     public function updateSkill(Request $request): Response
     {
+        $listSkill = $this->em->getRepository(Skill::class)->findAll();
 
         $skill = $this->em->getRepository(Skill::class)->findOneBy(['id' => $request->get('id')]);
 
         $form = $this->createForm(SkillFormType::class, $skill);
 
         $form->handleRequest($request);
+        $validator = true;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($skill);
-            $this->em->flush();
-            $this->addFlash("success", "La compétence a bien été créée.");
-            return $this->redirectToRoute("accueilSkill");
+            foreach ($listSkill as $elementSkill) {
+                if ($elementSkill->getSkillNumber() == $skill->getSkillNumber() && $elementSkill->getSection() == $skill->getSection() && !($elementSkill->getId() == $skill->getId())) {
+                    $validator = false;
+                    $this->addFlash("danger", "Cette identifiant de compétence est déjà attribué pour cette section");
+                }
+            }
+            if ($validator == true) {
+                $this->em->flush();
+                $this->addFlash("success", "La compétence a bien été modifiée.");
+                return $this->redirectToRoute("accueilSkill");
+            }
         }
         return $this->render('skill/updateSkill.html.twig', [
             'form' => $form->createView(),
@@ -88,9 +106,9 @@ class SkillController extends AbstractController
 
     public function deleteSkill(Request $request): Response
     {
-        $subskill = $this->em->getRepository(SubSkill::class)->findOneBy(['skill' => $request->get('id')]);
+        $subskill = $this->em->getRepository(SubSkill::class)->findBy(['skill' => $request->get('id')]);
         $skill =  $this->em->getRepository(Skill::class)->findOneBy(['id' => $request->get('id')]);
-        $this->em->remove($subskill);
+        if ($subskill != null) $this->em->remove($subskill);
         $this->em->remove($skill);
         $this->em->flush();
         return $this->redirectToRoute('accueilSkill');

@@ -53,15 +53,22 @@ class SubSkillController extends AbstractController
         $form = $this->createForm(SubSkillFormType::class, $subSkill);
 
         $form->handleRequest($request);
-
+        $validator = true;
         if ($form->isSubmitted() && $form->isValid()) {
             $subSkill->setSkill($skill);
-
-            $this->em->persist($subSkill);
-            $this->em->flush();
-            return $this->redirectToRoute("accueilSubSkill", [
-                'id' => $request->get('id')
-            ]);
+            foreach ($listSubSkill as $elementSubSkill) {
+                if ($elementSubSkill->getNumber() == $subSkill->getNumber()) {
+                    $validator = false;
+                    $this->addFlash("danger", "Cette identifiant de sous-compétence est déjà attribué");
+                }
+            }
+            if ($validator == true) {
+                $this->em->persist($subSkill);
+                $this->em->flush();
+                return $this->redirectToRoute("accueilSubSkill", [
+                    'id' => $request->get('id')
+                ]);
+            }
         }
         return $this->render('sub_skill/createSubSkill.html.twig', [
             'form' => $form->createView(),
@@ -85,19 +92,26 @@ class SubSkillController extends AbstractController
 
     public function updateSubSkill(Request $request)
     {
+        $listSubSkill = $this->em->getRepository(SubSkill::class)->findBy(['skill' => $request->get('id')]);
+
         $subSkill = $this->em->getRepository(SubSkill::class)->findOneBy(['id' => $request->get('idSubSkill')]);
         $form = $this->createForm(SubSkillFormType::class, $subSkill);
 
         $form->handleRequest($request);
-
+        $validator = true;
         if ($form->isSubmitted() && $form->isValid()) {
-
-
-
-            $this->em->flush();
-            return $this->redirectToRoute("accueilSubSkill", [
-                'id' => $request->get('id')
-            ]);
+            foreach ($listSubSkill as $elementSubSkill) {
+                if ($elementSubSkill->getNumber() == $subSkill->getNumber() && !($elementSubSkill->getId() == $subSkill->getId())) {
+                    $validator = false;
+                    $this->addFlash("danger", "Cette identifiant de sous-compétence est déjà attribué");
+                }
+            }
+            if ($validator == true) {
+                $this->em->flush();
+                return $this->redirectToRoute("accueilSubSkill", [
+                    'id' => $request->get('id')
+                ]);
+            }
         }
         return $this->render('sub_skill/updateSubSkill.html.twig', [
             'form' => $form->createView(),
