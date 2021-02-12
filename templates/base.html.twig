@@ -66,16 +66,7 @@
 		</header>
 		<div class="container-fluid">
 
-			{% for message in app.flashes("success") %}
-				<div class="alert
-					alert-success">{{message}}</div>
-			{% endfor %}
-			{% for message in app.flashes("danger") %}
-				<div class="alert
-						alert-danger">
-					{{message}}
-				</div>
-			{% endfor %}
+
 			<div class="row">
 				<nav
 					id="sidebarMenu"
@@ -106,6 +97,16 @@
 						ms-sm-auto
 						col-lg-10
 						px-md-4">
+					{% for message in app.flashes("success") %}
+						<div class="alert
+							alert-success">{{message}}</div>
+					{% endfor %}
+					{% for message in app.flashes("danger") %}
+						<div class="alert
+								alert-danger">
+							{{message}}
+						</div>
+					{% endfor %}
 					<div
 						class="d-flex
 							justify-content-between
@@ -125,6 +126,7 @@ body %}
 
 						</main>
 					</div>
+
 				</div>
 			</body>
 		</body>

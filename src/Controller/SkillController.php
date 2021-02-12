@@ -111,6 +111,7 @@ class SkillController extends AbstractController
         if ($subskill != null) $this->em->remove($subskill);
         $this->em->remove($skill);
         $this->em->flush();
+        $this->addFlash("success", "La compétence a bien été supprimée");
         return $this->redirectToRoute('accueilSkill');
     }
 }
