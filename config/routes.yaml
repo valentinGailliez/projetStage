@@ -26,3 +26,10 @@ updateSubSkill:
     path: /subskill/{id}/update/{idSubSkill}
     controller: App\Controller\SubSkillController::updateSubSkill
 
+updateSkill:
+    path : /skill/update/{id}
+    controller: App\Controller\SkillController::updateSkill
+
+deleteSkill:
+    path: /skill/delete/{id}
+    controller: App\Controller\SkillController::deleteSkill

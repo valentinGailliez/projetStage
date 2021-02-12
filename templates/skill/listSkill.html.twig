@@ -29,7 +29,10 @@
 				la
 				compétence
 			</td>
-			<td></td>
+			<td>
+				Supprimer
+				la
+				compétence</td>
 		</thead>
 
 		<tbody>
@@ -43,6 +46,18 @@
 							voir la
 							liste des
 							sous-compétence</a>
+					</td>
+					<td>
+						<a class="btn btn-warning" href="{{path('updateSkill',{'id':skill.id})}}">
+							Modifier
+							la
+							compétence</a>
+					</td>
+					<td>
+						<a class='btn btn-danger' href="{{path('deleteSkill',{'id':skill.id})}}">
+						Supprimer
+						la
+						compétence</a>
 					</td>
 				</tr>
 			{% endfor %}
