@@ -1,32 +1,24 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-	listes
-	sous
-	compétence
+	listes sous compétence
 {% endblock %}
 {% block body %}
 	<div class="container">
 		<h1>
-			Compétence
-			:
+			Compétence :
 			<br>
 			{{skill.name}}
 		</h1>
-		<table class="table
-				table-striped">
+		<table class="table table-striped">
 			<thead>
 				<td>Name</td>
 				<td>Section</td>
 				<td>Number</td>
 				<td>
-					Modifier
-					la
-					sous-compétence</td>
+					Modifier la sous-compétence</td>
 				<td>
-					Supprimer
-					la
-					sous-compétence</td>
+					Supprimer la sous-compétence</td>
 			</thead>
 
 			<tbody>
@@ -37,14 +29,11 @@
 						<td>{{subskill.number}}</td>
 						<td>
 							<a class="btn btn-warning" href="{{path('updateSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
-								Modifier
-								la
-								sous-compétence</a>
+								Modifier la sous-compétence</a>
 						</td>
 						<td>
 							<a class="btn btn-danger" href="{{path('deleteSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
-								Supprimer
-								sous-compétence</a>
+								Supprimer sous-compétence</a>
 						</td>
 					</tr>
 				{% endfor %}
@@ -54,12 +43,7 @@
 	</table>
 	<br><hr>
 	<a class="btn btn-primary" href="{{path('createSubSkill',{'id':skill.id})}}">
-		Ajouter
-		sous
-		compétence</a>
+		Ajouter sous compétence</a>
 	<a class="btn btn-secondary" href="{{path('accueilSkill')}}">
-		Revenir à
-		la liste
-		des
-		compétences</a>
+		Revenir à la liste des compétences</a>
 </div>{% endblock %}

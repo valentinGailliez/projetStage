@@ -1,0 +1,17 @@
+
+accueilSubSkill:
+    path: /subskill/{id}
+    controller: App\Controller\SubSkillController::getSubSkill
+
+
+createSubSkill:
+    path: /subskill/{id}/create
+    controller: App\Controller\SubSkillController::createSubSkill
+
+deleteSubSkill:
+    path: /subskill/{id}/delete/{idSubSkill}
+    controller: App\Controller\SubSkillController::deleteSubSkill
+
+updateSubSkill:
+    path: /subskill/{id}/update/{idSubSkill}
+    controller: App\Controller\SubSkillController::updateSubSkill

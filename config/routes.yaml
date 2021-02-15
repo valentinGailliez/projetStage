@@ -1,35 +1,3 @@
 index:
     path: /
     controller: App\Controller\IndexController::index
-
-accueilSubSkill:
-    path: /subskill/{id}
-    controller: App\Controller\SubSkillController::getSubSkill
-
-createSkill:
-    path: /skill/create
-    controller: App\Controller\SkillController::createSkill
-
-accueilSkill:
-    path: /skill
-    controller: App\Controller\SkillController::getListSkill
-
-createSubSkill:
-    path: /subskill/{id}/create
-    controller: App\Controller\SubSkillController::createSubSkill
-
-deleteSubSkill:
-    path: /subskill/{id}/delete/{idSubSkill}
-    controller: App\Controller\SubSkillController::deleteSubSkill
-
-updateSubSkill:
-    path: /subskill/{id}/update/{idSubSkill}
-    controller: App\Controller\SubSkillController::updateSubSkill
-
-updateSkill:
-    path : /skill/update/{id}
-    controller: App\Controller\SkillController::updateSkill
-
-deleteSkill:
-    path: /skill/delete/{id}
-    controller: App\Controller\SkillController::deleteSkill

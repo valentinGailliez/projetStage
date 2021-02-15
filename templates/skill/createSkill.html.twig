@@ -1,9 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-	Création
-	skill et
-	subskill
+	Création skill et subskill
 {% endblock %}
 {% block body %}
 
@@ -18,27 +16,19 @@
             }}
 
 			{{ form_start(form) }}
-			Nom de la
-			compétence
-			:
+			Nom de la compétence :
 			{{ form_widget(form.name)}}
-			Numéro de
-			Compétence
-			:
+			Numéro de Compétence :
 			{{ form_widget(form.skillNumber)}}
 			Section :
 			{{ form_widget(form.section)}}
 
-			Commentaire
-			:{{ form_widget(form.comments)}}
+			Commentaire :
+			{{ form_widget(form.comments)}}
 
 
-			<button
-				type="submit"
-				class="btn
-					btn-success">
-				Créer
-				compétence</button>
+			<button type="submit" class="btn btn-success">
+				Créer compétence</button>
 			{{ form_end(form)}}
 		</div>
 	</div>
@@ -46,11 +36,10 @@
 
 	{% if new == false %}
 		<div class="row">
-			<div class="col"><br> <hr><a class="btnbtn-secondary" href="{{path('accueilSkill')}}">
-					Revenir à
-					la liste
-					de
-					compétences
+			<div class="col"><br>
+				<hr>
+				<a class="btnbtn-secondary" href="{{path('accueilSkill')}}">
+					Revenir à la liste de compétences
 				</a>
 			</div>
 		</div>
