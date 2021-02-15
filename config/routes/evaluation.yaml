@@ -1,0 +1,3 @@
+viewEvaluation:
+  path: /evaluation
+  controller: App\Controller\EvaluationController:index
