@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\User;
 use App\Entity\SubSkill;
 use App\Entity\Intership;
+use App\Entity\Evaluation;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CotationRepository;
 use Doctrine\Common\Collections\Collection;

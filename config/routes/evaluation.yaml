@@ -1,3 +1,7 @@
-viewEvaluation:
+viewEvaluation :
   path: /evaluation
-  controller: App\Controller\EvaluationController:index
+  controller: App\Controller\EvaluationController::index
+
+createEvaluation :
+  path: /evaluation/{idUser}
+  controller: App\Controller\EvaluationController::createEvaluation

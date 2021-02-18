@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Evaluation
+{% endblock %}
+{% block body %}
+	<p class="h1">Evaluation de
+		{{student.lastname}}
+		{{student.firstname}}
+	</p>
+	<table class="table table-striped">
+		<thead>
+			<td>Numéro de la compétence / sous-compétence</td>
+			<td>Nom de la compétence / sous-compétence</td>
+			<td>Cotation</td>
+		</thead>
+
+		<tbody>
+			{% for skill in skills%}
+				{% if skill.subSkills != null %}
+					<tr>
+						<td>{{skill.skillNumber}}</td>
+						<td>{{skill.name}}</td>
+						<td>
+							<select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+								<option selected disabled>Evaluer la compétence</option>
+								<option value="1">One</option>
+								<option value="2">Two</option>
+								<option value="3">Three</option>
+								<option value="1">One</option>
+								<option value="2">Two</option>
+							</select>
+						</td>
+					</tr>
+				{% endif %}
+			</tbody>
+		{% endfor %}
+	</table>
+{% endblock %}

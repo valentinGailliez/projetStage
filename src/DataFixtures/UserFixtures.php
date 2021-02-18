@@ -19,7 +19,7 @@ class UserFixtures extends Fixture
             $user->setFirstName($faker->firstName)
                 ->setLastName($faker->lastName)
                 ->setMail($faker->email)
-                ->setType("Referent");
+                ->setType("Etudiant");
             $manager->persist($user);
         }
         $manager->flush();
