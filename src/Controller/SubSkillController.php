@@ -71,11 +71,12 @@ class SubSkillController extends AbstractController
 
     public function deleteSubSkill(Request $request)
     {
-        $id = $request->get("id");
+        $id = $request->get("idSubSkill");
         $subskill = $this->em->getRepository(SubSkill::class)->findOneBy(['id' => $id]);
-        $this->em->remove($subskill);
-        $this->em->flush();
-
+        if ($subskill != null) {
+            $this->em->remove($subskill);
+            $this->em->flush();
+        }
 
         return $this->redirectToRoute("accueilSubSkill", [
             'id' => $request->get('id')
@@ -109,7 +110,7 @@ class SubSkillController extends AbstractController
     private function checkForm($list, $itemToCheck)
     {
         foreach ($list as $element) {
-            if ($element->getNumber() == $itemToCheck->getNumber()) {
+            if ($element->getNumber() == $itemToCheck->getNumber() && !($element->getId() == $itemToCheck->getId())) {
                 $this->addFlash("danger", "Cette identifiant de sous-compétence est déjà attribué");
                 return false;
             }

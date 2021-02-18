@@ -16,10 +16,28 @@
 
 		<tbody>
 			{% for skill in skills%}
-				{% if skill.subSkills != null %}
+
+				<tr>
+					<td>
+						<u>
+							<i>
+								<b>{{skill.skillNumber}}</b>
+							</i>
+						</u>
+					</td>
+					<td>
+						<u>
+							<i>
+								<b>{{skill.name}}</b>
+							</i>
+						</u>
+					</td>
+				</tr>
+
+				{% for subskill in skill.subSkills %}
 					<tr>
-						<td>{{skill.skillNumber}}</td>
-						<td>{{skill.name}}</td>
+						<td>{{skill.skillNumber}}.{{subskill.number}}</td>
+						<td>{{subskill.name}}</td>
 						<td>
 							<select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
 								<option selected disabled>Evaluer la compétence</option>
@@ -31,7 +49,7 @@
 							</select>
 						</td>
 					</tr>
-				{% endif %}
+				{% endfor %}
 			</tbody>
 		{% endfor %}
 	</table>
