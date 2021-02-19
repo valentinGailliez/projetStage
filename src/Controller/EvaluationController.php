@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Cotation;
 use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
+use App\Form\CotationFormType;
 use App\Repository\SkillRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,10 +53,29 @@ class EvaluationController extends AbstractController
                 }
             }
         }
+        $Listcotation = new ArrayCollection();
+        foreach ($this->listSkill as $skill) {
+            foreach ($skill->getSubSkills() as $subSkill) {
+                $cotation = new Cotation();
+                $cotation->setSubSkill($subSkill);
+                $cotation->setUser($student);
+
+                $Listcotation->add($cotation);
+            }
+        }
 
         return $this->render('evaluation/createEvaluation.html.twig', [
-            'student' => $student,
+            'cotation' => $Listcotation,
             'skills' => $this->listSkill
         ]);
+    }
+    public function EvaluationCreated(Request $request): Response
+    {
+        $cotations = $request->get('cotation');
+        if (!$cotations == null) {
+            $this->em->persist($cotations);
+            $this->em->flush();
+        }
+        return $this->redirectToRoute('viewEvaluation');
     }
 }
