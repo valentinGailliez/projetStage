@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\CotationFormType;
+use App\Form\SubmitTypeFormType;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,11 +43,17 @@ class EvaluationController extends AbstractController
     {
         $student = $this->em->getRepository(User::class)->findOneBy(['id' => $request->get('idUser')]);
 
+        $form = $this->createForm(SubmitTypeFormType::class);
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dd('test');
+        }
         foreach ($this->listSkill as $skill) {
             if (sizeof($skill->getSubSkills()) == 0) {
                 array_splice($this->listSkill, array_search($skill, $this->listSkill), 1);
             } else {
-                $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], array('number' => 'ASC'));
+                $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
                 foreach ($listSubSkill as $subSkill) {
                     $skill->removeSubSkill($subSkill);
                     $skill->addSubSkill($subSkill);
@@ -66,16 +73,32 @@ class EvaluationController extends AbstractController
 
         return $this->render('evaluation/createEvaluation.html.twig', [
             'cotation' => $Listcotation,
-            'skills' => $this->listSkill
+            'skills' => $this->listSkill,
+            'form' => $form->createView()
         ]);
     }
-    public function EvaluationCreated(Request $request): Response
+    public function evaluationCreated(Request $request): Response
     {
-        $cotations = $request->get('cotation');
-        if (!$cotations == null) {
-            $this->em->persist($cotations);
-            $this->em->flush();
+        $cotations = $this->getCotation($request);
+
+        return $this->render('evaluation/listEvaluation.html.twig');
+        //return $this->redirectToRoute('viewEvaluation');
+    }
+
+    private function getCotation($request)
+    {
+        $student = $this->em->getRepository(User::class)->findOneBy(['id' => $request->get('idUser')]);
+
+        $Listcotation = new ArrayCollection();
+        foreach ($this->listSkill as $skill) {
+            foreach ($skill->getSubSkills() as $subSkill) {
+                $cotation = new Cotation();
+                $cotation->setSubSkill($subSkill);
+                $cotation->setUser($student);
+
+                $Listcotation->add($cotation);
+            }
         }
-        return $this->redirectToRoute('viewEvaluation');
+        return $Listcotation;
     }
 }

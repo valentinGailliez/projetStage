@@ -1,0 +1,3 @@
+userList:
+  path: /utilisateur
+  controller: App\Controller\UserController::index
