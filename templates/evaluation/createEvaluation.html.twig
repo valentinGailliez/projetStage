@@ -3,57 +3,59 @@
 {% block title %}Evaluation
 {% endblock %}
 {% block body %}
-	<p class="h1">Evaluation de
-		{{cotation[0].user.lastname}}
-		{{cotation[0].user.firstname}}
-	</p>
+	{% if cotation != null %}
+		<p class="h1">Evaluation de
+			{{student.lastname}}
+			{{student.firstname}}
+		</p>
 
 
-	<table class="table table-striped">
-		<thead>
-			<td>Numéro de la compétence / sous-compétence</td>
-			<td>Nom de la compétence / sous-compétence</td>
-			<td>Cotation</td>
-		</thead>
+		<table class="table table-striped">
+			<thead>
+				<td>Numéro de la compétence / sous-compétence</td>
+				<td>Nom de la compétence / sous-compétence</td>
+				<td>Cotation</td>
+			</thead>
 
-		<tbody>
-			{% for skill in skills%}
-				{% set indexSkill = loop.index0 %}
-				<tr>
-					<td>
-						<u>
-							<i>
-								<b>{{skill.skillNumber}}</b>
-							</i>
-						</u>
-					</td>
-					<td>
-						<u>
-							<i>
-								<b>{{skill.name}}</b>
-							</i>
-						</u>
-					</td>
-				</tr>
-
-				{% for subskill in skill.subSkills %}
+			<tbody>
+				{% for skill in skills%}
+					{% set indexSkill = loop.index0 %}
 					<tr>
-						{% set indexSubSkill = loop.index0 %}
-						<td>{{skill.skillNumber}}.{{subskill.number}}</td>
-						<td>{{subskill.name}}</td>
-
 						<td>
-							<select class="form-select form-select-lg mb-3" id="{{indexSubSkill + indexSkill}}" aria-label=".form-select-lg example">
-								<option selected disabled value="0">Evaluer la compétence</option>
-								<option value="1">NA--</option>
-								<option value="2">NA-</option>
-								<option value="3">A+</option>
-								<option value="4">A++</option>
-							</select>
+							<u>
+								<i>
+									<b>{{skill.skillNumber}}</b>
+								</i>
+							</u>
+						</td>
+						<td>
+							<u>
+								<i>
+									<b>{{skill.name}}</b>
+								</i>
+							</u>
 						</td>
 					</tr>
-				{% endfor %}
-			</tbody>
-		{% endfor %}
-	</table>
+
+					{% for subskill in skill.subSkills %}
+						<tr>
+							{% set indexSubSkill = loop.index0 %}
+							<td>{{skill.skillNumber}}.{{subskill.number}}</td>
+							<td>{{subskill.name}}</td>
+
+							<td>
+								<select class="form-select form-select-lg mb-3" id="{{indexSubSkill + indexSkill}}" aria-label=".form-select-lg example">
+									<option selected disabled value="0">Evaluer la compétence</option>
+									<option value="1">NA--</option>
+									<option value="2">NA-</option>
+									<option value="3">A+</option>
+									<option value="4">A++</option>
+								</select>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			{% endfor %}
+		</table>
+	{% endif %}
 {% endblock %}

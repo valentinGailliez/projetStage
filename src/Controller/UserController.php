@@ -10,21 +10,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class UserController extends AbstractController
 {
-    private $em, $listUser;
+    private $em;
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
-
-        $this->listUser =  $this->em->getRepository(User::class)->findBy(array(), ['type' => 'ASC', 'lastname' => 'ASC']);
     }
 
-
-    public function index(): Response
+    /**
+     * @Route("/utilisateur",name="userList")
+     */
+    public function list(): Response
     {
-
+        $listUser =  $this->em->getRepository(User::class)->findBy(array(), ['type' => 'ASC', 'lastname' => 'ASC']);
         return $this->render('user/index.html.twig', [
             'controller_name' => 'UserController',
-            'students' => $this->listUser
+            'students' => $listUser
         ]);
     }
 }

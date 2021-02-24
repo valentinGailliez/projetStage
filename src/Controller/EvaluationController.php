@@ -19,39 +19,36 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class EvaluationController extends AbstractController
 {
 
-    private $em, $listSkill, $listStudent;
+    private $em;
     public function __construct(EntityManagerInterface $entityManager, SkillRepository $repository)
     {
         $this->em = $entityManager;
-        $this->listStudent = $this->em->getRepository(User::class)->findBy(['type' => 'Etudiant']);
-        $this->listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), array('skillNumber' => 'ASC'));
     }
 
 
     /**
-     * @Route("/evaluation", name="evaluation")
+     * @Route("/evaluation", name="viewEvaluation")
      */
-    public function index(): Response
+    public function listStudent(): Response
     {
+        $listStudent = $this->em->getRepository(User::class)->findBy(['type' => 'Etudiant']);
         return $this->render('evaluation/index.html.twig', [
             'controller_name' => 'EvaluationController',
-            'students' => $this->listStudent
+            'students' => $listStudent
         ]);
     }
-
-    public function createEvaluation(Request $request): Response
+    /**
+     * @Route("/evaluation/{id}",name="createEvaluation")
+     */
+    public function createEvaluation(User $student): Response
     {
-        $student = $this->em->getRepository(User::class)->findOneBy(['id' => $request->get('idUser')]);
-
+        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), array('skillNumber' => 'ASC'));
         $form = $this->createForm(SubmitTypeFormType::class);
 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            dd('test');
-        }
-        foreach ($this->listSkill as $skill) {
+        foreach ($listSkill as $skill) {
             if (sizeof($skill->getSubSkills()) == 0) {
-                array_splice($this->listSkill, array_search($skill, $this->listSkill), 1);
+                array_splice($listSkill, array_search($skill, $listSkill), 1);
             } else {
                 $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
                 foreach ($listSubSkill as $subSkill) {
@@ -61,7 +58,7 @@ class EvaluationController extends AbstractController
             }
         }
         $Listcotation = new ArrayCollection();
-        foreach ($this->listSkill as $skill) {
+        foreach ($listSkill as $skill) {
             foreach ($skill->getSubSkills() as $subSkill) {
                 $cotation = new Cotation();
                 $cotation->setSubSkill($subSkill);
@@ -73,32 +70,9 @@ class EvaluationController extends AbstractController
 
         return $this->render('evaluation/createEvaluation.html.twig', [
             'cotation' => $Listcotation,
-            'skills' => $this->listSkill,
+            'skills' => $listSkill,
+            'student' => $student,
             'form' => $form->createView()
         ]);
-    }
-    public function evaluationCreated(Request $request): Response
-    {
-        $cotations = $this->getCotation($request);
-
-        return $this->render('evaluation/listEvaluation.html.twig');
-        //return $this->redirectToRoute('viewEvaluation');
-    }
-
-    private function getCotation($request)
-    {
-        $student = $this->em->getRepository(User::class)->findOneBy(['id' => $request->get('idUser')]);
-
-        $Listcotation = new ArrayCollection();
-        foreach ($this->listSkill as $skill) {
-            foreach ($skill->getSubSkills() as $subSkill) {
-                $cotation = new Cotation();
-                $cotation->setSubSkill($subSkill);
-                $cotation->setUser($student);
-
-                $Listcotation->add($cotation);
-            }
-        }
-        return $Listcotation;
     }
 }
