@@ -22,17 +22,17 @@
 			</thead>
 
 			<tbody>
-				{% for subskill in subskills%}
+				{% for subskill in skill.subskills %}
 					<tr>
 						<td>{{subskill.name}}</td>
 						<td>{{skill.section}}</td>
 						<td>{{subskill.number}}</td>
 						<td>
-							<a class="btn btn-warning" href="{{path('updateSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
+							<a class="btn btn-warning" href="{{path('updateSubSkill',{'id':subskill.id})}}">
 								Modifier la sous-compétence</a>
 						</td>
 						<td>
-							<a class="btn btn-danger" href="{{path('deleteSubSkill',{'id':skill.id , 'idSubSkill':subskill.id})}}">
+							<a class="btn btn-danger" href="{{path('deleteSubSkill',{'id':subskill.id})}}">
 								Supprimer sous-compétence</a>
 						</td>
 					</tr>
