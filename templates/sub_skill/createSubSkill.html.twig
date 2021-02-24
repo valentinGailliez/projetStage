@@ -4,34 +4,35 @@
 	Gestion skill et subskill
 {% endblock %}
 {% block body %}
-	<h1>Sous-Compétence</h1>
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Création sous-compétence</div>
+	</div>
 	<div class="container">
 		<div class="row">
-			{{ form_start(form, {
-                'attr': {
-                    'novalidate': 'novalidate',
-                    'class': 'col-lg-5' 
-                    }
-                })
+			{{ form_start(form)
             }}
 
 
-			Nom de la compétence :
+			Nom de la sous-compétence :
 			{{ form_widget(form.name)}}
-			Numéro de Compétence :
+			Numéro de sous-compétence :
 			{{ form_widget(form.number)}}
-
-			<button type="submit" class="btn btn-primary">
-				Créer compétence</button>
-			{{ form_end(form)}}
-
+			<div class="row">
+				<div class="col">
+					<br>
+					<hr>
+					<button type="submit" class="btn btn-primary">
+						Créer sous-compétence</button>
+					{{ form_end(form)}}
+				</div>
+			</div>
 			<div class="row">
 				<div class="col">
 					<br>
 					<hr>
 
-					<a class="btn btn-secondary" href="{{path('accueilSkill')}}">
-						Revenir à la liste de compétences</a>
+					<a class="btn btn-secondary" href="{{path('accueilSubSkill',{'id':skill.id})}}">
+						Revenir à la liste de sous-compétences</a>
 				</div>
 			</div>
 		</div>

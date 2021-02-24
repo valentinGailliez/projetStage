@@ -4,10 +4,13 @@
 {% endblock %}
 {% block body %}
 	{% if cotation != null %}
-		<p class="h1">Evaluation de
-			{{student.lastname}}
-			{{student.firstname}}
-		</p>
+		<div class="btn-toolbar mb-2 mb-md-0">
+			<h1>
+				Evaluation de
+				{{student.lastname}}
+				{{student.firstname}}
+			</div>
+		</div>
 
 
 		<table class="table table-striped">

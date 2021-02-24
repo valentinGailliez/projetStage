@@ -85,7 +85,8 @@ class SubSkillController extends AbstractController
             ]);
         }
         return $this->render('sub_skill/updateSubSkill.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'skill' => $subSkill->getSkill()
         ]);
     }
 }
