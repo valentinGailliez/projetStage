@@ -23,10 +23,6 @@ class SkillFormType extends AbstractType
             ->add('section', TextType::class, [
                 'required' => true,
                 'constraints' => [new Length(['min' => 1, 'max' => 255])]
-            ])
-            ->add('comments', TextType::class, [
-                'required' => false,
-                'constraints' => [new Length(['min' => 0, 'max' => 255])]
             ]);
     }
 

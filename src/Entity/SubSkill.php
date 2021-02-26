@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SubSkillRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -37,6 +39,10 @@ class SubSkill
     private $skill;
 
 
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $comments;
 
 
 
@@ -82,6 +88,18 @@ class SubSkill
     public function setSkill(?Skill $skill): self
     {
         $this->skill = $skill;
+
+        return $this;
+    }
+
+    public function getComments(): ?string
+    {
+        return $this->comments;
+    }
+
+    public function setComments(?string $comments): self
+    {
+        $this->comments = $comments;
 
         return $this;
     }

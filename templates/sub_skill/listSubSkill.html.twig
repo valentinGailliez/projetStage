@@ -15,6 +15,7 @@
 				<td>Name</td>
 				<td>Section</td>
 				<td>Number</td>
+				<td>Commentaire</td>
 				<td>
 					Modifier la sous-compétence</td>
 				<td>
@@ -27,6 +28,19 @@
 						<td>{{subskill.name}}</td>
 						<td>{{skill.section}}</td>
 						<td>{{subskill.number}}</td>
+						<td>
+							{% if subskill.comments != null %}
+								{{subskill.comments}}
+							{% else %}
+								<i>
+									<b>
+										<u>
+											PAS DE COMMENTAIRE
+										</u>
+									</b>
+								</i>
+							{% endif %}
+						</td>
 						<td>
 							<a class="btn btn-warning" href="{{path('updateSubSkill',{'id':subskill.id})}}">
 								Modifier la sous-compétence</a>

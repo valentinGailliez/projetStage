@@ -12,7 +12,7 @@
 			<td>Nom de compétence</td>
 			<td>Section</td>
 			<td>Numéro de compétence</td>
-			<td>Commentaire</td>
+
 			<td>Voir les sous-compétences</td>
 			<td>Modifier la compétence</td>
 			<td>Supprimer la compétence</td>
@@ -24,19 +24,7 @@
 					<td>{{skill.name}}</td>
 					<td>{{skill.section}}</td>
 					<td>{{skill.skillNumber}}</td>
-					<td>
-						{% if skill.comments != null %}
-							{{skill.comments}}
-						{% else %}
-							<i>
-								<b>
-									<u>
-										PAS DE COMMENTAIRE
-									</u>
-								</b>
-							</i>
-						{% endif %}
-					</td>
+
 					<td>
 						<a class="btn btn-secondary" href="{{path('accueilSubSkill',{'id' : skill.id})}}">
 							voir la liste des sous-compétence

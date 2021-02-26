@@ -57,19 +57,10 @@ class EvaluationController extends AbstractController
                 }
             }
         }
-        $Listcotation = new ArrayCollection();
-        foreach ($listSkill as $skill) {
-            foreach ($skill->getSubSkills() as $subSkill) {
-                $cotation = new Cotation();
-                $cotation->setSubSkill($subSkill);
-                $cotation->setUser($student);
 
-                $Listcotation->add($cotation);
-            }
-        }
 
         return $this->render('evaluation/createEvaluation.html.twig', [
-            'cotation' => $Listcotation,
+
             'skills' => $listSkill,
             'student' => $student,
             'form' => $form->createView()

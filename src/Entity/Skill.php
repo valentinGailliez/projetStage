@@ -41,10 +41,6 @@ class Skill
     private $section;
 
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $comments;
 
     /**
      * @ORM\OneToMany(targetEntity=SubSkill::class, mappedBy="skill" , cascade={"persist", "remove"})
@@ -102,17 +98,7 @@ class Skill
     }
 
 
-    public function getComments(): ?string
-    {
-        return $this->comments;
-    }
 
-    public function setComments(?string $comments): self
-    {
-        $this->comments = $comments;
-
-        return $this;
-    }
 
     /**
      * @return Collection|SubSkill[]

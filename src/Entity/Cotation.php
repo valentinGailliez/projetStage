@@ -35,12 +35,6 @@ class Cotation
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=SubSkill::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $subSkill;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Intership::class)
      * @ORM\JoinColumn(nullable=false)
      */
@@ -50,6 +44,12 @@ class Cotation
      * @ORM\ManyToOne(targetEntity=Evaluation::class, inversedBy="cotation")
      */
     private $evaluation;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=SubSkill::class, inversedBy="cotations")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $subSkill;
 
 
 
@@ -88,17 +88,7 @@ class Cotation
         return $this;
     }
 
-    public function getSubSkill(): ?SubSkill
-    {
-        return $this->subSkill;
-    }
 
-    public function setSubSkill(?SubSkill $subSkill): self
-    {
-        $this->subSkill = $subSkill;
-
-        return $this;
-    }
 
     public function getIntership(): ?Intership
     {
@@ -120,6 +110,18 @@ class Cotation
     public function setEvaluation(?Evaluation $evaluation): self
     {
         $this->evaluation = $evaluation;
+
+        return $this;
+    }
+
+    public function getSubSkill(): ?SubSkill
+    {
+        return $this->subSkill;
+    }
+
+    public function setSubSkill(?SubSkill $subSkill): self
+    {
+        $this->subSkill = $subSkill;
 
         return $this;
     }

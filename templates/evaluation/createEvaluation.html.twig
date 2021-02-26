@@ -3,62 +3,61 @@
 {% block title %}Evaluation
 {% endblock %}
 {% block body %}
-	{% if cotation != null %}
-		<div class="btn-toolbar mb-2 mb-md-0">
-			<h1>
-				Evaluation de
-				{{student.lastname}}
-				{{student.firstname}}
-			</div>
+
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>
+			Evaluation de
+			{{student.lastname}}
+			{{student.firstname}}
 		</div>
+	</div>
 
 
-		<table class="table table-striped">
-			<thead>
-				<td>Numéro de la compétence / sous-compétence</td>
-				<td>Nom de la compétence / sous-compétence</td>
-				<td>Cotation</td>
-			</thead>
+	<table class="table table-striped">
+		<thead>
+			<td>Numéro de la compétence / sous-compétence</td>
+			<td>Nom de la compétence / sous-compétence</td>
+			<td>Cotation</td>
+		</thead>
 
-			<tbody>
-				{% for skill in skills%}
-					{% set indexSkill = loop.index0 %}
+		<tbody>
+			{% for skill in skills%}
+				{% set indexSkill = loop.index0 %}
+				<tr>
+					<td>
+						<u>
+							<i>
+								<b>{{skill.skillNumber}}</b>
+							</i>
+						</u>
+					</td>
+					<td>
+						<u>
+							<i>
+								<b>{{skill.name}}</b>
+							</i>
+						</u>
+					</td>
+				</tr>
+
+				{% for subskill in skill.subSkills %}
 					<tr>
+						{% set indexSubSkill = loop.index0 %}
+						<td>{{skill.skillNumber}}.{{subskill.number}}</td>
+						<td>{{subskill.name}}</td>
+
 						<td>
-							<u>
-								<i>
-									<b>{{skill.skillNumber}}</b>
-								</i>
-							</u>
-						</td>
-						<td>
-							<u>
-								<i>
-									<b>{{skill.name}}</b>
-								</i>
-							</u>
+							<select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+								<option selected disabled value="0">Evaluer la compétence</option>
+								<option value="1">NA--</option>
+								<option value="2">NA-</option>
+								<option value="3">A+</option>
+								<option value="4">A++</option>
+							</select>
 						</td>
 					</tr>
-
-					{% for subskill in skill.subSkills %}
-						<tr>
-							{% set indexSubSkill = loop.index0 %}
-							<td>{{skill.skillNumber}}.{{subskill.number}}</td>
-							<td>{{subskill.name}}</td>
-
-							<td>
-								<select class="form-select form-select-lg mb-3" id="{{indexSubSkill + indexSkill}}" aria-label=".form-select-lg example">
-									<option selected disabled value="0">Evaluer la compétence</option>
-									<option value="1">NA--</option>
-									<option value="2">NA-</option>
-									<option value="3">A+</option>
-									<option value="4">A++</option>
-								</select>
-							</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			{% endfor %}
-		</table>
-	{% endif %}
+				{% endfor %}
+			</tbody>
+		{% endfor %}
+	</table>
 {% endblock %}
