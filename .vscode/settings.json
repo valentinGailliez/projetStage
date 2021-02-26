@@ -1,0 +1,6 @@
+{
+    "intelephense.rename.exclude": [
+        "**/vendor/**",
+        "**/var"
+    ]
+}

@@ -42,7 +42,7 @@ class EvaluationController extends AbstractController
      */
     public function createEvaluation(User $student): Response
     {
-        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), array('skillNumber' => 'ASC'));
+        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
         $form = $this->createForm(SubmitTypeFormType::class);
 
 
