@@ -5,6 +5,7 @@
 	{{student.firstname}}
 {% endblock %}
 {% block body %}
+
 	<div class="container">
 		<div class="row">
 			<h1>
@@ -47,7 +48,7 @@
 								<td>{{subskill.name}}</td>
 
 								<td>
-									<select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+									<select class="form-select form-select-lg mb-3" id="{{subskill.id}}" aria-label=".form-select-lg example">
 										<option selected disabled value="0">Evaluer la compétence</option>
 										<option value="1">NA--</option>
 										<option value="2">NA-</option>
@@ -62,4 +63,6 @@
 			</table>
 		</div>
 	</div>
+
+
 {% endblock %}

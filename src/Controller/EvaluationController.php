@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\CotationFormType;
+use App\Form\SkillFormType;
 use App\Form\SubmitTypeFormType;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -42,9 +43,14 @@ class EvaluationController extends AbstractController
      */
     public function createEvaluation(User $student): Response
     {
-        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
-        $form = $this->createForm(SubmitTypeFormType::class);
 
+
+        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
+        $form = $this->createForm(SkillFormType::class);
+
+        if ($form->isSubmitted()) {
+            return $this->redirectToRoute("viewEvaluation");
+        }
 
         foreach ($listSkill as $skill) {
             if (sizeof($skill->getSubSkills()) == 0) {
@@ -63,7 +69,6 @@ class EvaluationController extends AbstractController
 
             'skills' => $listSkill,
             'student' => $student,
-            'form' => $form->createView()
         ]);
     }
 }

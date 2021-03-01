@@ -28,19 +28,6 @@ class Intership
      * @ORM\Column(type="string")
      */
     private $ansco;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $bloc;
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $section;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    private $department;
 
     /**
      * @ORM\ManyToMany(targetEntity=Skill::class)
@@ -56,6 +43,12 @@ class Intership
      * @ORM\Column(type="date")
      */
     private $lastDay;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="interships")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $applicationField;
 
     public function __construct()
     {
@@ -91,41 +84,6 @@ class Intership
         return $this;
     }
 
-    public function getBloc(): ?string
-    {
-        return $this->bloc;
-    }
-
-    public function setBloc(string $bloc): self
-    {
-        $this->bloc = $bloc;
-
-        return $this;
-    }
-
-    public function getSection(): ?string
-    {
-        return $this->section;
-    }
-
-    public function setSection(string $section): self
-    {
-        $this->section = $section;
-
-        return $this;
-    }
-
-    public function getDepartment(): ?string
-    {
-        return $this->department;
-    }
-
-    public function setDepartment(string $department): self
-    {
-        $this->department = $department;
-
-        return $this;
-    }
 
     /**
      * @return Collection|Skill[]
@@ -174,6 +132,18 @@ class Intership
     public function setLastDay(\DateTimeInterface $lastDay): self
     {
         $this->lastDay = $lastDay;
+
+        return $this;
+    }
+
+    public function getApplicationField(): ?ApplicationField
+    {
+        return $this->applicationField;
+    }
+
+    public function setApplicationField(?ApplicationField $applicationField): self
+    {
+        $this->applicationField = $applicationField;
 
         return $this;
     }

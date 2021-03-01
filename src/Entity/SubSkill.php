@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\SubSkillRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\Skill;
+use App\Entity\Cotation;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\SubSkillRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=SubSkillRepository::class)
@@ -44,11 +46,17 @@ class SubSkill
      */
     private $comments;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Cotation::class, mappedBy="subSkill")
+     * @ORM\Column(nullable=true)
+     */
+    private $cotations;
 
 
 
     public function __construct()
     {
+        $this->cotations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -100,6 +108,36 @@ class SubSkill
     public function setComments(?string $comments): self
     {
         $this->comments = $comments;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Cotation[]
+     */
+    public function getCotation(): Collection
+    {
+        return $this->subSkills;
+    }
+
+    public function addCotation(Cotation $cotation): self
+    {
+        if (!$this->cotations->contains($cotation)) {
+            $this->cotations[] = $cotation;
+            $cotation->setSubSkill($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCotation(Cotation $cotation): self
+    {
+        if ($this->cotations->removeElement($cotation)) {
+            // set the owning side to null (unless already changed)
+            if ($cotation->getSubSkill() === $this) {
+                $cotation->setSubSkill(null);
+            }
+        }
 
         return $this;
     }
