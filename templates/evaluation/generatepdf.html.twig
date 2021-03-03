@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<table class="table table-striped">
+				<thead>
+					<td>Numéro de la compétence</td>
+					<td>Nom de la sous-compétence</td>
+					<td>Cotation</td>
+				</thead>
+
+				<tbody>
+					{% for cotation in cotations %}
+						<tr>
+
+							<td>C{{cotation.subskill.skill.skillNumber}}
+								:
+								{{cotation.subskill.skill.name}}</td>
+							<td>
+								{{cotation.subskill.skill.skillNumber}}.{{cotation.subskill.number}}
+								:
+								{{cotation.subskill.name}}</td>
+
+
+							<td>
+								{% if cotation.cotation == 1 %}
+									NA--
+								{% else %}
+									{% if cotation.cotation == 2 %}
+										NA-
+									{% else %}
+										{% if cotation.cotation == 3 %}
+											A+
+										{% else %}
+											A++
+										{% endif %}
+									{% endif %}
+								{% endif %}
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+			{{form_start(form)}}
+			Commentaire Global :{{form_widget(form.comments)}}
+			{{form_end(form)}}
+		</div>
+	</div>
+{% endblock %}

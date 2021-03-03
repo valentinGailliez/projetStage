@@ -6,7 +6,10 @@ use App\Entity\Cotation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class CotationFormType extends AbstractType
 {
@@ -22,7 +25,9 @@ class CotationFormType extends AbstractType
                     'A++' => 4,
 
                 ]
-            ]);
+            ])
+            ->add('comments', TextareaType::class)
+            ->add('save', SubmitType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver)

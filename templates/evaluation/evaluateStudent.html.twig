@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Evaluation de
+	{{student.lastname}}
+	{{student.firstname}}
+{% endblock %}
+{% block body %}
+	{{form_start(form)}}
+	<div class="container">
+		<div class="row">
+			<h1>
+				Evaluation de
+				{{student.lastname}}
+				{{student.firstname}}
+			</h1>
+
+
+			<table class="table table-striped">
+				<thead>
+					<td>Numéro de la compétence / sous-compétence</td>
+					<td>Nom de la compétence / sous-compétence</td>
+					<td>Cotation</td>
+				</thead>
+
+				<tbody>
+
+					<tr>
+
+						<td>{{subskill.skill.skillNumber}}.{{subskill.number}}</td>
+						<td>
+							<i>
+								<u>
+									<b>{{subskill.skill.name}}</b>
+								</u>
+							</i>
+							<br>{{subskill.name}}</td>
+
+						<td>{{form_widget(form.cotation)}}</td>
+					</tr>
+				</tbody>
+			</table>
+			{{form_widget(form.comments)}}
+			{{form_row(form.save)}}
+			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':student.id})}}">revenir aux compétences</a>
+		</div>
+	</div>
+	{{form_end(form)}}
+
+{% endblock %}

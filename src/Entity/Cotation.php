@@ -36,7 +36,7 @@ class Cotation
 
     /**
      * @ORM\ManyToOne(targetEntity=Intership::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $intership;
 
@@ -50,6 +50,11 @@ class Cotation
      * @ORM\JoinColumn(nullable=false)
      */
     private $subSkill;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $comments;
 
 
 
@@ -122,6 +127,18 @@ class Cotation
     public function setSubSkill(?SubSkill $subSkill): self
     {
         $this->subSkill = $subSkill;
+
+        return $this;
+    }
+
+    public function getComments(): ?string
+    {
+        return $this->comments;
+    }
+
+    public function setComments(?string $comments): self
+    {
+        $this->comments = $comments;
 
         return $this;
     }

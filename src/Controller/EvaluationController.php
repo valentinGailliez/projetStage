@@ -2,19 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\Cotation;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use App\Entity\User;
 use App\Entity\Skill;
+use App\Entity\Cotation;
 use App\Entity\SubSkill;
-use App\Form\CotationFormType;
+use App\Entity\Evaluation;
 use App\Form\SkillFormType;
+use App\Form\CotationFormType;
+use App\Form\EvaluationFormType;
 use App\Form\SubmitTypeFormType;
 use App\Repository\SkillRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class EvaluationController extends AbstractController
@@ -38,19 +42,17 @@ class EvaluationController extends AbstractController
             'students' => $listStudent
         ]);
     }
+
+
     /**
-     * @Route("/evaluation/{id}",name="createEvaluation")
+     * @Route("/evaluation/{id}/evaluer",name="listEvaluation")
      */
-    public function createEvaluation(User $student): Response
+    public function listEvaluation(User $student, Request $request): Response
     {
 
-
         $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
-        $form = $this->createForm(SkillFormType::class);
+        $cotation = new Cotation();
 
-        if ($form->isSubmitted()) {
-            return $this->redirectToRoute("viewEvaluation");
-        }
 
         foreach ($listSkill as $skill) {
             if (sizeof($skill->getSubSkills()) == 0) {
@@ -67,8 +69,88 @@ class EvaluationController extends AbstractController
 
         return $this->render('evaluation/createEvaluation.html.twig', [
 
-            'skills' => $listSkill,
+
             'student' => $student,
+            'skills' => $listSkill
+        ]);
+    }
+
+    /**
+     * @Route("/evaluation/{id}/{index}/{subIndex}",name="createEvaluation")
+     */
+    public function createEvaluation(User $student, Request $request): Response
+    {
+
+        $index = $request->get('index');
+        $subIndex = $request->get('subIndex');
+        $cotation = new Cotation();
+        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
+
+
+        $skill = $listSkill[$index];
+        if (sizeof($skill->getSubSkills()) == 0) {
+            array_splice($listSkill, array_search($skill, $listSkill), 1);
+            return $this->redirectToRoute("createEvaluation", ['id' => $student->getId(), 'index' => $index++]);
+        } else {
+            $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
+            $subSkill = $listSubSkill[$subIndex];
+        }
+
+        $cotationfind = $this->em->getRepository(Cotation::class)->findOneBy(['user' => $student->getId(), 'subSkill' => $subSkill->getId()]);
+        if ($cotationfind != null)
+            $cotation = $cotationfind;
+
+
+
+        $form = $this->createForm(CotationFormType::class, $cotation);
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            $cotation->setUser($student);
+            $cotation->setSubSkill($subSkill);
+            if ($cotationfind == null)
+                $this->em->persist($cotation);
+            $this->em->flush();
+
+            return $this->redirectToRoute("listEvaluation", [
+                'id' => $student->getId()
+            ]);
+        }
+
+
+
+        return $this->render('evaluation/evaluateStudent.html.twig', [
+
+            'subskill' => $subSkill,
+            'student' => $student,
+            'form' => $form->createView(),
+            'skills' => $listSkill
+        ]);
+    }
+
+    /**
+     * @Route("/evaluation/{id}",name="createUserEvaluation")
+     */
+    public function createUserEvaluation(User $student, Request $request): Response
+    {
+        $evaluation = new Evaluation();
+
+        $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId()]);
+
+        array_multisort($cotations);
+        $form = $this->createForm(EvaluationFormType::class, $evaluation);
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            $dompdf = new Dompdf();
+            //  On  ajoute le texte à afficher
+            $dompdf->loadHtml('test');
+            // On fait générer le pdf  à Dompdf ...
+            $dompdf->render();
+            //  et on l'affiche dans un   objet Response
+            return new Response($dompdf->stream());
+        }
+        return $this->render('evaluation/generatepdf.html.twig', [
+            'form' => $form->createView(),
+            'cotations' => $cotations
         ]);
     }
 }

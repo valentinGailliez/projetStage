@@ -47,6 +47,7 @@ class Skill
      */
     private $subSkills;
 
+
     public function __construct()
     {
         $this->subSkills = new ArrayCollection();
