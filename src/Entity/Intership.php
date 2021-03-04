@@ -29,10 +29,6 @@ class Intership
      */
     private $ansco;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Skill::class)
-     */
-    private $skill;
 
     /**
      * @ORM\Column(type="date")
@@ -50,10 +46,6 @@ class Intership
      */
     private $applicationField;
 
-    public function __construct()
-    {
-        $this->skill = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -85,32 +77,7 @@ class Intership
     }
 
 
-    /**
-     * @return Collection|Skill[]
-     */
-    public function getSkill(): Collection
-    {
-        return $this->skill;
-    }
 
-    public function addSkill(Skill $skill): self
-    {
-        if (!$this->skill->contains($skill)) {
-            $this->skill[] = $skill;
-        }
-
-        return $this;
-    }
-
-    public function removeSkill(Skill $skill): self
-    {
-        if ($this->skill->removeElement($skill)) {
-            // set the owning side to null (unless already changed)
-
-        }
-
-        return $this;
-    }
 
     public function getFirstDay(): ?\DateTimeInterface
     {

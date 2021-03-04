@@ -47,7 +47,7 @@ class SubSkill
     private $comments;
 
     /**
-     * @ORM\OneToMany(targetEntity=Cotation::class, mappedBy="subSkill")
+     * @ORM\OneToMany(targetEntity=SubSkillCotation::class, mappedBy="subSkill")
      * @ORM\Column(nullable=true)
      */
     private $cotations;

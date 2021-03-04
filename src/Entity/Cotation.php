@@ -23,10 +23,6 @@ class Cotation
      */
     private $id;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $cotation;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class)
@@ -35,33 +31,33 @@ class Cotation
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Intership::class)
+     * @ORM\ManyToOne(targetEntity=IntershipSkill::class)
      * @ORM\JoinColumn(nullable=true)
      */
-    private $intership;
+    private $intershipskill;
 
     /**
      * @ORM\ManyToOne(targetEntity=Evaluation::class, inversedBy="cotation")
      */
     private $evaluation;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=SubSkill::class, inversedBy="cotations")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $subSkill;
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $comments;
 
+    /**
+     * @ORM\OneToMany(targetEntity=SubSkillCotation::class, mappedBy="skillcotation", orphanRemoval=true)
+     */
+    private $subskillcotation;
+
 
 
     public function __construct()
     {
         $this->user = new ArrayCollection();
-        $this->subskill = new ArrayCollection();
+        $this->subskillcotation = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,17 +65,6 @@ class Cotation
         return $this->id;
     }
 
-    public function getCotation(): ?int
-    {
-        return $this->cotation;
-    }
-
-    public function setCotation(int $cotation): self
-    {
-        $this->cotation = $cotation;
-
-        return $this;
-    }
 
     public function getUser(): ?User
     {
@@ -119,17 +104,7 @@ class Cotation
         return $this;
     }
 
-    public function getSubSkill(): ?SubSkill
-    {
-        return $this->subSkill;
-    }
 
-    public function setSubSkill(?SubSkill $subSkill): self
-    {
-        $this->subSkill = $subSkill;
-
-        return $this;
-    }
 
     public function getComments(): ?string
     {
@@ -139,6 +114,36 @@ class Cotation
     public function setComments(?string $comments): self
     {
         $this->comments = $comments;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|SubSkillCotation[]
+     */
+    public function getSubskillcotation(): Collection
+    {
+        return $this->subskillcotation;
+    }
+
+    public function addSubskillcotation(SubSkillCotation $subskillcotation): self
+    {
+        if (!$this->subskillcotation->contains($subskillcotation)) {
+            $this->subskillcotation[] = $subskillcotation;
+            $subskillcotation->setSkillcotation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubskillcotation(SubSkillCotation $subskillcotation): self
+    {
+        if ($this->subskillcotation->removeElement($subskillcotation)) {
+            // set the owning side to null (unless already changed)
+            if ($subskillcotation->getSkillcotation() === $this) {
+                $subskillcotation->setSkillcotation(null);
+            }
+        }
 
         return $this;
     }
