@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des stages
+{% endblock %}
+
+{% block body %}
+	<style>
+		.example-wrapper {
+			margin: 1em auto;
+			max-width: 800px;
+			width: 95%;
+			font: 18px / 1.5 sans-serif;
+		}
+		.example-wrapper code {
+			background: #F5F5F5;
+			padding: 2px 6px;
+		}
+	</style>
+
+
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Liste de stages</h1>
+		<table class="table table-striped">
+			<thead>
+				<td>Domaine</td>
+				<td>Departement</td>
+				<td>Lieu</td>
+				<td>Section / sous-section</td>
+				<td>Bloc</td>
+				<td>Début de stage - Fin de stage</td>
+				<td>Année académique</td>
+			</thead>
+			<tbody>
+
+				{% for intership in interships %}
+					<td></td>
+					<td></td>
+
+					<td></td>
+					<td></td>
+					<td></td>
+					<td>{{intership.firstDay | date("d/m/Y")}}
+						-
+						{{intership.lastDay | date("d/m/Y") }}</td>
+					<td>{{intership.ansco}}</td>
+
+				{% endfor %}
+			</tbody>
+		</tbody>
+	</table>
+	<a class="btn btn-warning" href="{{path('createIntership')}}">creer un stage</a>
+</div>{% endblock %}

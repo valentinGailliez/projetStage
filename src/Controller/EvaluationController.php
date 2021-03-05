@@ -25,7 +25,7 @@ class EvaluationController extends AbstractController
 {
 
     private $em;
-    public function __construct(EntityManagerInterface $entityManager, SkillRepository $repository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
     }

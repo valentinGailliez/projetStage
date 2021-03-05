@@ -42,7 +42,7 @@ class Intership
 
     /**
      * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="interships")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=true)
      */
     private $applicationField;
 

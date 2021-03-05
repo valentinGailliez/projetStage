@@ -7,7 +7,13 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.css';
-import 'public/css/dashboard.css'
+import './styles/dashboard.css'
 
-// start the Stimulus application
-import './bootstrap';
+require('./styles/global.scss');
+
+let $ = require('jquery');
+
+global.$ = global.jQuery = $;
+$(document).ready(function () {
+    console.log("hello");
+});

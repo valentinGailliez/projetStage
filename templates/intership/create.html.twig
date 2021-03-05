@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Création d'un stage
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<h1>Création stage</h1>
+			{{ form_start(form)
+            }}
+			Code ECTS :
+			{{form_widget(form.ectsCode)}}
+			Année académique :
+			{{form_widget(form.ansco)}}
+
+			début de stage :
+			{{form_widget(form.firstDay)}}
+			fin de stage :
+			{{form_widget(form.lastDay)}}
+			<select id="selectDepartment">
+				{% for appli in applis %}
+					{% if appli.type == "department" %}
+						<option value="{{appli.id}}">{{appli.name}}</option>
+					{% endif %}
+				{% endfor %}
+			</select>
+
+
+			<select id="selectLieu"></select>
+			<button type="submit" class="btn btn-success">
+				Créer stage</button>
+			{{ form_end(form)}}
+		</div>
+		<div class="row">
+			<div class="col"><br>
+				<hr>
+				<a class="btn btn-secondary" href="{{path('intership')}}">
+					Revenir à la liste de stages
+				</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}
+	<script>
+		$(document).ready(function () {
+$("#selectLieu").hide();
+$("#selectDepartment").change(function () {
+$("#selectLieu").empty();
+$("#selectLieu").show();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectDepartment").val()) {
+
+$("#selectLieu").append(new Option("{{ appli.name }}", "{{ appli.id }}"));
+}
+{% endif %}
+{% endfor %}
+});
+});
+	</script>
+{% endblock %}
