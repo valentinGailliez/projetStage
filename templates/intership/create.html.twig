@@ -7,17 +7,23 @@
 	<div class="container">
 		<div class="row">
 			<h1>Création stage</h1>
-			{{ form_start(form)
-            }}
-			Code ECTS :
-			{{form_widget(form.ectsCode)}}
-			Année académique :
-			{{form_widget(form.ansco)}}
+			<form method="POST">
+				Année académique :
+				<input type="text" name="ansco" id="ansco" class="form-control form-control-lg"/>
+				<table class="table table-striped">
+					<thead>
+						<td>Début de stage</td>
+						<td>Fin de stage</td>
 
-			début de stage :
-			{{form_widget(form.firstDay)}}
-			fin de stage :
-			{{form_widget(form.lastDay)}}
+					</thead>
+					<tbody>
+						<td><input type="date" name="first" class="input-group date" id="first"/></td>
+						<td><input type="date" name="end" class="input-group date" id="end"/></td>
+					</tbody>
+				</tbody>
+			</table>
+
+
 			<select id="selectDomain">
 				<option value="0">Veuillez choisir un Domaine</option>
 				{% for appli in applis %}
@@ -25,18 +31,17 @@
 						<option value="{{appli.id}}">{{appli.name}}</option>
 					{% endif %}
 				{% endfor %}
-			</option>
-		</select>
-		<select id="selectDepartment"></select>
+			</select>
+			<select id="selectDepartment"></select>
 
 
-		<select id="selectLieu"></select>
-		<select id="selectSection"></select>
-		<select id="selectSubSection"></select>
-		<select id="selectBloc"></select>
-		<button type="submit" class="btn btn-success">
-			Créer stage</button>
-		{{ form_end(form)}}
+			<select id="selectLieu"></select>
+			<select id="selectSection"></select>
+			<select id="selectSubSection"></select>
+			<select id="selectBloc" name="selectBloc"></select>
+			<button type="submit" id="btnSubmit" class="btn btn-success">
+				Créer stage</button>
+		</form>
 	</div>
 	<div class="row">
 		<div class="col"><br>
@@ -47,25 +52,16 @@
 		</div>
 	</div>
 </div>{% endblock %}{% block javascripts %}
-{{parent()}}
-<script>
+{{parent()}}<script>
 	$(document).ready(function () {
 var conditionTrue = 0;
-$("#selectDepartment").hide();
-$("#selectLieu").hide();
-$("#selectSection").hide();
-$("#selectSubSection").hide();
-$("#selectBloc").hide();
 
-
+hide();
 // When you choose a domain
 $("#selectDomain").change(function () {
 conditionTrue = 0;
 $("#selectDepartment").empty();
-$("#selectLieu").hide();
-$("#selectSection").hide();
-$("#selectSubSection").hide();
-$("#selectBloc").hide();
+hide();
 $("#selectDepartment").append(new Option("Veuillez choisir un département", 0));{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectDomain").val()) {
 $("#selectDepartment").show();
 conditionTrue = 1;
@@ -83,10 +79,8 @@ $("#selectDepartment").change(function () {
 conditionTrue = 0;
 $("#selectLieu").empty();
 
-$("#selectSection").hide();
-$("#selectSubSection").hide();
-$("#selectBloc").hide();
-
+hide();
+$("#selectDepartment").show();
 $("#selectLieu").append(new Option("Veuillez choisir un lieu", 0));{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectDepartment").val()) {
 $("#selectLieu").show();
 conditionTrue = 1;
@@ -102,10 +96,10 @@ $("#selectLieu").hide();
 // when you choose a place
 $("#selectLieu").change(function () {
 $("#selectSection").empty();
-
-$("#selectSubSection").hide();
+hide();
 $("#selectSection").append(new Option("Veuillez choisir une section", 0));
-$("#selectBloc").hide();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectLieu").val()) {
+$("#selectDepartment").show();
+$("#selectLieu").show();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectLieu").val()) {
 $("#selectSection").show();
 $("#selectSection").append(new Option("{{ appli.name }}", "{{ appli.id }}"));
 }
@@ -121,8 +115,14 @@ $("#selectSection").change(function () {
 $("#selectSubSection").empty();
 $("#selectBloc").empty();
 
-$("#selectSubSection").hide();
-$("#selectBloc").hide();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectSection").val()) {
+$("#selectSubSection").append(new Option("Veuillez choisir une sous-section", 0));
+
+$("#selectBloc").append(new Option("Veuillez choisir un bloc", 0));
+hide();
+$("#selectDepartment").show();
+$("#selectLieu").show();
+$("#selectSection").show();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectSection").val()) {
+
 conditionTrue = 1;
 if ("{{ appli.type }}" == "sub_section") {
 
@@ -145,8 +145,13 @@ $("#selectBloc").hide();
 // when you choose a subsection
 $("#selectSubSection").change(function () {
 $("#selectBloc").empty();
+hide();
+$("#selectDepartment").show();
+$("#selectLieu").show();
+$("#selectSection").show();
 
-$("#selectBloc").hide();{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectSubSection").val()) {
+$("#selectSubSection").show();
+$("#selectBloc").append(new Option("Veuillez choisir un bloc", 0));{% for appli in applis %}{% if appli.parent != null %}if ("{{ appli.parent.id }}" == $("#selectSubSection").val()) {
 conditionTrue = 1;
 
 
@@ -160,5 +165,43 @@ if (conditionTrue == 0) {
 $("#selectBloc").hide();
 }
 });
+
+// when you choose a bloc
+$("#selectBloc").change(function () {
+
+$("#btnSubmit").show();
+
 });
+$("#btnSubmit").click(function () {
+click();
+});
+});
+
+
+function click() {
+
+if ($("#first").val() < $('#end').val()) {
+var $data;
+console.log($("#selectBloc").val());
+$data = ({'idAppli': $("#selectBloc").val(), 'ansco': $('#ansco').val(), 'end': $('#end').val(), 'first': $("#first").val()});
+
+jsonString = JSON.stringify({$data});
+$.ajax({
+type: "POST",
+url: "{{ path('createIntership') }}",
+data: "data=" + jsonString
+
+});
+
+}
+
+}
+function hide() {
+$("#selectDepartment").hide();
+$("#selectLieu").hide();
+$("#selectSection").hide();
+$("#selectSubSection").hide();
+$("#selectBloc").hide();
+$("#btnSubmit").hide();
+}
 </script>{% endblock %}

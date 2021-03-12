@@ -8,7 +8,9 @@ use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\Cotation;
 use App\Entity\SubSkill;
+use App\Entity\Intership;
 use App\Entity\Evaluation;
+use App\Entity\SubSkillCotation;
 use App\Form\SkillFormType;
 use App\Form\CotationFormType;
 use App\Form\EvaluationFormType;
@@ -20,6 +22,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class EvaluationController extends AbstractController
 {
@@ -32,125 +35,88 @@ class EvaluationController extends AbstractController
 
 
     /**
-     * @Route("/evaluation", name="viewEvaluation")
+     * @Route("/evaluation/intership",name="viewEvaluationIntership")
      */
-    public function listStudent(): Response
+    public function getListIntership(): Response
     {
-        $listStudent = $this->em->getRepository(User::class)->findBy(['type' => 'Etudiant']);
+        $listIntership = $this->em->getRepository(Intership::class)->findAll();
+        return $this->render('evaluation/listIntership.html.twig', [
+            'interships' => $listIntership
+        ]);
+    }
+    /**
+     * @Route("/evaluation/intership/{id}", name="viewEvaluation")
+     */
+    public function listStudent(Intership $intership): Response
+    {
+
         return $this->render('evaluation/index.html.twig', [
-            'controller_name' => 'EvaluationController',
-            'students' => $listStudent
+
+            'students' => $intership->getApplicationField()->getUsers(),
+            'intership' => $intership
         ]);
     }
 
 
     /**
-     * @Route("/evaluation/{id}/evaluer",name="listEvaluation")
+     * @Route("/evaluation/{id}/evaluer/{idIntership}",name="listEvaluation")
+     * @ParamConverter("intership", options={"id" = "idIntership"})
      */
-    public function listEvaluation(User $student, Request $request): Response
+    public function listEvaluation(User $student, Intership $intership, Request $request): Response
     {
+        $cotations = [];
+        $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership, 'user' => $student]);
+        if ($cotations == null) {
+            $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
 
-        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
-        $cotation = new Cotation();
 
 
-        foreach ($listSkill as $skill) {
-            if (sizeof($skill->getSubSkills()) == 0) {
-                array_splice($listSkill, array_search($skill, $listSkill), 1);
-            } else {
-                $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
-                foreach ($listSubSkill as $subSkill) {
-                    $skill->removeSubSkill($subSkill);
-                    $skill->addSubSkill($subSkill);
+
+            foreach ($listSkill as $skill) {
+                if (sizeof($skill->getSubSkills()) == 0) {
+                    array_splice($listSkill, array_search($skill, $listSkill), 1);
+                } else {
+                    $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
+                    foreach ($listSubSkill as $subSkill) {
+                        $skill->removeSubSkill($subSkill);
+                        $skill->addSubSkill($subSkill);
+                    }
                 }
             }
-        }
 
+            foreach ($listSkill as $skill) {
+                $cotation = new Cotation();
+                $cotation->setUser($student);
+                $cotation->setSkill($skill);
+                $cotation->setIntership($intership);
+                foreach ($skill->getSubSkills() as $subskill) {
+                    $subCotation = new SubSkillCotation();
+                    $subCotation->setSubSkill($subskill);
+                    $subCotation->setCotation(0);
+                    $cotation->addSubskillcotation($subCotation);
+                }
+                $cotations->add($cotation);
+                $this->em->persist($cotation);
+            }
+            $this->em->flush();
+        }
 
         return $this->render('evaluation/createEvaluation.html.twig', [
 
 
             'student' => $student,
-            'skills' => $listSkill
-        ]);
-    }
-
-    /**
-     * @Route("/evaluation/{id}/{index}/{subIndex}",name="createEvaluation")
-     */
-    public function createEvaluation(User $student, Request $request): Response
-    {
-
-        $index = $request->get('index');
-        $subIndex = $request->get('subIndex');
-        $cotation = new Cotation();
-        $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
-
-
-        $skill = $listSkill[$index];
-        if (sizeof($skill->getSubSkills()) == 0) {
-            array_splice($listSkill, array_search($skill, $listSkill), 1);
-            return $this->redirectToRoute("createEvaluation", ['id' => $student->getId(), 'index' => $index++]);
-        } else {
-            $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
-            $subSkill = $listSubSkill[$subIndex];
-        }
-
-        $cotationfind = $this->em->getRepository(Cotation::class)->findOneBy(['user' => $student->getId(), 'subSkill' => $subSkill->getId()]);
-        if ($cotationfind != null)
-            $cotation = $cotationfind;
-
-
-
-        $form = $this->createForm(CotationFormType::class, $cotation);
-        $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            $cotation->setUser($student);
-            $cotation->setSubSkill($subSkill);
-            if ($cotationfind == null)
-                $this->em->persist($cotation);
-            $this->em->flush();
-
-            return $this->redirectToRoute("listEvaluation", [
-                'id' => $student->getId()
-            ]);
-        }
-
-
-
-        return $this->render('evaluation/evaluateStudent.html.twig', [
-
-            'subskill' => $subSkill,
-            'student' => $student,
-            'form' => $form->createView(),
-            'skills' => $listSkill
-        ]);
-    }
-
-    /**
-     * @Route("/evaluation/{id}",name="createUserEvaluation")
-     */
-    public function createUserEvaluation(User $student, Request $request): Response
-    {
-        $evaluation = new Evaluation();
-
-        $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId()]);
-
-        array_multisort($cotations);
-        $form = $this->createForm(EvaluationFormType::class, $evaluation);
-        $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            $dompdf = new Dompdf();
-            //  On  ajoute le texte à afficher
-            $dompdf->loadHtml('test');
-            // On fait générer le pdf  à Dompdf ...
-            $dompdf->render();
-            //  et on l'affiche dans un   objet Response
-            return new Response($dompdf->stream());
-        }
-        return $this->render('evaluation/generatepdf.html.twig', [
-            'form' => $form->createView(),
             'cotations' => $cotations
         ]);
+    }
+
+    /**
+     * @Route("evaluation",name="evaluationTest")
+     */
+    public function test(Request $request)
+    {
+        $subCotation = $this->em->getRepository(SubSkillCotation::class)->findOneBy(['id' => $request->get('subSkillCotation')]);
+        $subCotation->setCotation($request->get('cotation'));
+        $this->em->flush();
+        return new Response("test");
     }
 }

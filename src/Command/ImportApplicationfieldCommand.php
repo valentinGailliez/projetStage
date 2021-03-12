@@ -41,11 +41,13 @@ class ImportApplicationfieldCommand extends Command
         $applicationFields = json_decode($data);
 
         $applicationFieldsClone = json_decode($data);
+        $applicationFieldsCloneParent = json_decode($data);
         foreach ($applicationFields as $appli) {
             $applicationfield = new ApplicationField();
             $applicationfield->setCode($appli->code);
             $applicationfield->setName($appli->name);
-            $applicationfield->setAllIn($appli->all_in);
+            if ($appli->all_in == null) $applicationfield->setAllIn("");
+            else $applicationfield->setAllIn($appli->all_in);
             $applicationfield->setIsActive($appli->is_active);
             $applicationfield->setType($appli->type);
 
@@ -54,17 +56,36 @@ class ImportApplicationfieldCommand extends Command
         $this->em->flush();
         $i = 0;
         $applicationFieldsDataBase = $this->em->getRepository(ApplicationField::class)->findAll();
-
+        $parent = new ApplicationField();
         foreach ($applicationFields as $appli) {
             foreach ($applicationFieldsClone as $app) {
                 if ($app->id == $appli->parent_id && $appli->parent_id != null) {
-                    $application = $this->em->getRepository(ApplicationField::class)->findOneBy(["code" => $app->code, "name" => $app->name]);
+                    $applications = $this->em->getRepository(ApplicationField::class)->findBy(["code" => $app->code, "name" => $app->name, "allIn" => $app->all_in]);
 
-                    $applicationFieldsDataBase[$i]->setParent($application);
-                    $this->em->flush();
+
+                    if (count($applications) > 1) {
+                        foreach ($applicationFieldsCloneParent as $appParent) {
+                            if ($appParent->id == $app->parent_id && $app->parent_id != null) {
+                                $parent = $this->em->getRepository(ApplicationField::class)->findOneBy(["code" => $appParent->code, "name" => $appParent->name, "allIn" => $appParent->all_in]);
+                            }
+                            foreach ($applications as $application) {
+                                if ($application->getParent() != null) {
+                                    if ($application->getParent()->getCode() == $parent->getCode()) {
+
+                                        $applicationFieldsDataBase[$i]->setParent($application);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        $application = $applications[0];
+
+                        $applicationFieldsDataBase[$i]->setParent($application);
+                    }
                 }
             }
             $i++;
+            $this->em->flush();
         }
 
 

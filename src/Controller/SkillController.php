@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ApplicationField;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\SkillFormType;
@@ -39,18 +40,20 @@ class SkillController extends AbstractController
     public function create(Request $request): Response
     {
         $skill = new Skill();
+        $domains = $this->em->getRepository(ApplicationField::class)->findBy(["type" => "category"]);
         $form = $this->createForm(SkillFormType::class, $skill);
+
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->em->persist($skill);
             $this->em->flush();
             $this->addFlash("success", "La compétence a bien été créée.");
             return $this->redirectToRoute("accueilSkill");
         }
         return $this->render('skill/createSkill.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'domains' => $domains
         ]);
     }
     /**

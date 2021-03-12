@@ -30,11 +30,6 @@ class Cotation
      */
     private $user;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=IntershipSkill::class)
-     * @ORM\JoinColumn(nullable=true)
-     */
-    private $intershipskill;
 
     /**
      * @ORM\ManyToOne(targetEntity=Evaluation::class, inversedBy="cotation")
@@ -48,9 +43,21 @@ class Cotation
     private $comments;
 
     /**
-     * @ORM\OneToMany(targetEntity=SubSkillCotation::class, mappedBy="skillcotation", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=SubSkillCotation::class, mappedBy="skillcotation",cascade={"persist", "remove"})
      */
     private $subskillcotation;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Skill::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $skill;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Intership::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $intership;
 
 
 
@@ -80,17 +87,6 @@ class Cotation
 
 
 
-    public function getIntership(): ?Intership
-    {
-        return $this->intership;
-    }
-
-    public function setIntership(?Intership $intership): self
-    {
-        $this->intership = $intership;
-
-        return $this;
-    }
 
     public function getEvaluation(): ?Evaluation
     {
@@ -144,6 +140,30 @@ class Cotation
                 $subskillcotation->setSkillcotation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSkill(): ?Skill
+    {
+        return $this->skill;
+    }
+
+    public function setSkill(?Skill $skill): self
+    {
+        $this->skill = $skill;
+
+        return $this;
+    }
+
+    public function getIntership(): ?Intership
+    {
+        return $this->intership;
+    }
+
+    public function setIntership(?Intership $intership): self
+    {
+        $this->intership = $intership;
 
         return $this;
     }

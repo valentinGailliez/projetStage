@@ -34,11 +34,6 @@ class Skill
      */
     private $name;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank
-     */
-    private $section;
 
 
 
@@ -46,6 +41,12 @@ class Skill
      * @ORM\OneToMany(targetEntity=SubSkill::class, mappedBy="skill" , cascade={"persist", "remove"})
      */
     private $subSkills;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="skills")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $domain;
 
 
     public function __construct()
@@ -86,17 +87,6 @@ class Skill
         return $this;
     }
 
-    public function getSection(): ?string
-    {
-        return $this->section;
-    }
-
-    public function setSection(string $section): self
-    {
-        $this->section = $section;
-
-        return $this;
-    }
 
 
 
@@ -127,6 +117,18 @@ class Skill
                 $subSkill->setSkill(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDomain(): ?ApplicationField
+    {
+        return $this->domain;
+    }
+
+    public function setDomain(?ApplicationField $domain): self
+    {
+        $this->domain = $domain;
 
         return $this;
     }

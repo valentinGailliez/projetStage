@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Attribuer les compétences à ce stage
+{% endblock %}
+{% block body %}
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Attribuer les compétences à ce stage</div>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<td>Nom de compétence</td>
+			<td>Domaine</td>
+			<td>Numéro de compétence</td>
+			<td>Ajouter / Supprimer la compétence de la grille</td>
+		</thead>
+
+		<tbody>
+			{% for skill in skills%}
+				<tr>
+					<td>{{skill.name}}</td>
+					<td>{{skill.domain.name}}</td>
+					<td>{{skill.skillNumber}}</td>
+					<td>
+						<button name="adding" class="{{skill.id}}">Ajouter</button>
+
+						<button name="removing" class="{{skill.id}}">Supprimer</button>
+					</td>
+				</tr>
+			</td>
+		</tbody>
+	{% endfor %}
+</table>{% endblock %}{% block javascripts %}
+{{parent()}}<script>
+	$(document).ready(function () {
+hideDeleteButton()
+
+$("button").each(function () {
+$(this).click(function () {
+
+var skill = $(this).attr('class')
+switchbtn(skill);
+});
+});
+});
+
+function switchbtn(skill) {
+$('.' + skill + '').toggle()
+if ($('.' + skill + '[name="adding"]').is(":visible")) {
+alert('button removing disparait')
+$.ajax({
+url: "/intership/deleteSkill",
+type: 'get',
+data: {
+'skill': skill,
+'intership': {{ intership.id }}
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {
+alert("success");
+},
+error: function () {}
+});
+} else {
+$.ajax({
+url: "/intership/addSkill",
+type: 'get',
+data: {
+'skill': skill,
+'intership': {{ intership.id }}
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {
+alert("success");
+},
+error: function () {}
+});
+}
+
+
+}
+function hideDeleteButton() {
+$("button[name='removing']").hide()
+}
+</script>{% endblock %}

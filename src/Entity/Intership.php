@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\IntershipRepository;
+use DateTime;
 
 /**
  * @ORM\Entity(repositoryClass=IntershipRepository::class)
@@ -21,7 +22,7 @@ class Intership
     private $id;
     /**
      * 
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable = true)
      */
     private $ectsCode;
     /**
@@ -42,9 +43,18 @@ class Intership
 
     /**
      * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="interships")
-     * @ORM\JoinColumn(nullable=true)
      */
     private $applicationField;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Skill::class)
+     */
+    private $skills;
+
+    public function __construct()
+    {
+        $this->skills = new ArrayCollection();
+    }
 
 
     public function getId(): ?int
@@ -79,24 +89,24 @@ class Intership
 
 
 
-    public function getFirstDay(): ?\DateTimeInterface
+    public function getFirstDay(): ?DateTime
     {
         return $this->firstDay;
     }
 
-    public function setFirstDay(\DateTimeInterface $firstDay): self
+    public function setFirstDay(DateTime $firstDay): self
     {
         $this->firstDay = $firstDay;
 
         return $this;
     }
 
-    public function getLastDay(): ?\DateTimeInterface
+    public function getLastDay(): ?DateTime
     {
         return $this->lastDay;
     }
 
-    public function setLastDay(\DateTimeInterface $lastDay): self
+    public function setLastDay(DateTime $lastDay): self
     {
         $this->lastDay = $lastDay;
 
@@ -111,6 +121,30 @@ class Intership
     public function setApplicationField(?ApplicationField $applicationField): self
     {
         $this->applicationField = $applicationField;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Skill[]
+     */
+    public function getSkills(): Collection
+    {
+        return $this->skills;
+    }
+
+    public function addSkill(Skill $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills[] = $skill;
+        }
+
+        return $this;
+    }
+
+    public function removeSkill(Skill $skill): self
+    {
+        $this->skills->removeElement($skill);
 
         return $this;
     }

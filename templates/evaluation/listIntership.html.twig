@@ -22,20 +22,18 @@
 		<h1>Liste de stages</h1>
 		<table class="table table-striped">
 			<thead>
-				<td>Domaine</td>
-				<td>Departement</td>
 				<td>Lieu</td>
 				<td>Section / sous-section</td>
 				<td>Bloc</td>
 				<td>Début de stage - Fin de stage</td>
 				<td>Année académique</td>
+				<td>Acceder aux étudiants</td>
 			</thead>
 			<tbody>
-				<tr>
-					{% for intership in interships %}
+
+				{% for intership in interships %}
+					<tr>
 						{% if intership.applicationField.parent.type != "sub_section" %}
-							<td id="{{intership.id}}">{{intership.applicationField.parent.parent.parent.parent.name}}</td>
-							<td>{{intership.applicationField.parent.parent.parent.name}}</td>
 
 							<td>{{intership.applicationField.parent.parent.name}}</td>
 							<td>
@@ -55,34 +53,13 @@
 							-
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
+						<td>
+							<a class="btn btn-success" href="{{path('viewEvaluation',{'id':intership.id})}}">Acceder aux étudiants</a>
+						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
 		</tbody>
 	</table>
 	<a class="btn btn-warning" href="{{path('createIntership')}}">creer un stage</a>
-</div>{% endblock %}{% block javascripts %}
-{{parent()}}<script>
-	$(document).ready(function () {
-$("tr").each(function () {
-$(this).click(function () {
-var intership = $(this).children().attr('id')
-click(intership);
-});
-});
-});
-
-
-function click(intership) {
-jsonString = JSON.stringify(intership);{% for intership in interships %}if ("{{ intership.id }}" == intership) {
-window.location.href = "{{ path('skillIntership',{'id':intership.id}) }}";
-}
-{% endfor %}
-$.ajax({
-type: "POST",
-url: "/intership",
-data: "data=" + jsonString
-
-});
-}
-</script>{% endblock %}
+</div>{% endblock %}

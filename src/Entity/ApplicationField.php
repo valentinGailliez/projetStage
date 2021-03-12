@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\ApplicationFieldRepository")
  */
 class ApplicationField
 {
@@ -104,11 +104,24 @@ class ApplicationField
      */
     private $type;
 
+    /**
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="applicationField")
+     */
+    private $users;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Skill::class, mappedBy="domain", orphanRemoval=true)
+     */
+    private $skills;
+
+
 
     public function __construct()
     {
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
         $this->interships = new ArrayCollection();
+        $this->users = new ArrayCollection();
+        $this->skills = new ArrayCollection();
     }
 
     public function setId($id): self
@@ -375,6 +388,78 @@ class ApplicationField
     public function setType(string $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setApplicationField($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getApplicationField() === $this) {
+                $user->setApplicationField(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Skill[]
+     */
+    public function getSkills(): Collection
+    {
+        return $this->skills;
+    }
+
+    public function addSkill(Skill $skill): self
+    {
+        if (!$this->skills->contains($skill)) {
+            $this->skills[] = $skill;
+            $skill->setDomain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSkill(Skill $skill): self
+    {
+        if ($this->skills->removeElement($skill)) {
+            // set the owning side to null (unless already changed)
+            if ($skill->getDomain() === $this) {
+                $skill->setDomain(null);
+            }
+        }
 
         return $this;
     }

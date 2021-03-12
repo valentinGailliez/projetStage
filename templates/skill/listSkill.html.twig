@@ -10,7 +10,7 @@
 	<table class="table table-striped">
 		<thead>
 			<td>Nom de compétence</td>
-			<td>Section</td>
+			<td>Domaine</td>
 			<td>Numéro de compétence</td>
 			<td>Nombre de sous-compétences</td>
 			<td>Voir les sous-compétences</td>
@@ -22,7 +22,7 @@
 			{% for skill in skills%}
 				<tr>
 					<td>{{skill.name}}</td>
-					<td>{{skill.section}}</td>
+					<td>{{skill.domain.name}}</td>
 					<td>{{skill.skillNumber}}</td>
 					<td>{{skill.subSkills|length}}</td>
 					<td>

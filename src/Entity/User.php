@@ -45,6 +45,13 @@ class User
      */
     private $intership;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $applicationField;
+
+
     public function __construct()
     {
         $this->intership = new ArrayCollection();
@@ -127,6 +134,18 @@ class User
     public function removeIntership(IntershipPlace $intership): self
     {
         $this->intership->removeElement($intership);
+
+        return $this;
+    }
+
+    public function getApplicationField(): ?ApplicationField
+    {
+        return $this->applicationField;
+    }
+
+    public function setApplicationField(?ApplicationField $applicationField): self
+    {
+        $this->applicationField = $applicationField;
 
         return $this;
     }
