@@ -12,40 +12,87 @@
 
 				<tbody>
 					{% for cotation in cotations %}
+						{% set index = 0 %}
 						<tr>
-
-							<td>C{{cotation.subskill.skill.skillNumber}}
-								:
-								{{cotation.subskill.skill.name}}</td>
-							<td>
-								{{cotation.subskill.skill.skillNumber}}.{{cotation.subskill.number}}
-								:
-								{{cotation.subskill.name}}</td>
-
-
-							<td>
-								{% if cotation.cotation == 1 %}
-									NA--
-								{% else %}
-									{% if cotation.cotation == 2 %}
-										NA-
-									{% else %}
-										{% if cotation.cotation == 3 %}
-											A+
-										{% else %}
-											A++
-										{% endif %}
-									{% endif %}
+							{% if index != 0 %}
+								<tr>
 								{% endif %}
+								<td rowspan={{cotation.subskillcotation|length}}>C{{cotation.skill.skillNumber}}
+									:
+									{{cotation.skill.name}}</td>
+								{% for subcotation in cotation.subskillcotation %}
+									{% set index = loop.index %}
+									<td>{{subcotation.subskill.name}}</td>
+
+
+									<td>
+										{% if subcotation.cotation == 1 %}
+											NA--
+										{% else %}
+											{% if subcotation.cotation == 2 %}
+												NA-
+											{% else %}
+												{% if subcotation.cotation == 3 %}
+													A+
+												{% else %}
+													A++
+												{% endif %}
+											{% endif %}
+										{% endif %}
+									</td>
+									{% if index != cotation.subskillcotation|length %}
+									</tr>
+								{% endif %}
+							{% endfor %}
+						</tr>
+						<tr>
+							<td colspan="3">Commentaire :
+								{% if cotation.comments == "" or cotation.comments == null %}
+									Pas de commentaire pour cette compétence.
+								{% endif %}
+								{{cotation.comments}}
 							</td>
 						</tr>
 					{% endfor %}
 				</tbody>
 			</table>
-
+			<div class="form-group green-border-focus">
+				<label for="exampleFormControlTextarea5">Commentaire Global</label>
+				<textarea class="form-control" name="{{evaluation.id}}" rows="3">{{evaluation.comments}}</textarea>
+				<br>
+			</div>
 			{{form_start(form)}}
-			Commentaire Global :{{form_widget(form.comments)}}
 			{{form_end(form)}}
+
 		</div>
 	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}<script>
+
+		$(document).ready(function () { // When you change your cotation
+$("textarea").each(function () {
+$(this).change(function () {
+var evaluation = $(this).attr('id')
+var comments = $(this).val()
+console.log(comments)
+$.ajax({
+url: "/evaluationArchiveComments",
+type: 'get',
+data: {
+'comments': comments,
+'evaluation': evaluation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+})
+
+
+});
+	</script>
 {% endblock %}

@@ -36,7 +36,7 @@
 						{% for subcotation in cotation.subskillcotation %}
 							<tr>
 
-								<td>{{subcotation.subskill.skill.skillNumber}}.{{subcotation.subskill.number}}</td>
+								<td>{{cotation.skill.skillNumber}}.{{subcotation.subskill.number}}</td>
 								<td>
 									{{subcotation.subskill.name}}</td>
 
@@ -58,7 +58,7 @@
 				<div class="form-group green-border-focus">
 					<label for="exampleFormControlTextarea5">Commentaire sur la compétence :
 						{{cotation.skill.name}}</label>
-					<textarea class="form-control" id="exampleFormControlTextarea5" rows="3"></textarea>
+					<textarea class="form-control" id="{{cotation.id}}" rows="3">{{cotation.comments}}</textarea>
 					<br>
 				</div>
 				<hr style="height:4px;border-width:0;color:blue;background-color:red">
@@ -72,7 +72,7 @@
 {% block javascripts %}
 	{{parent()}}<script>
 
-		$(document).ready(function () {
+		$(document).ready(function () { // When you change your cotation
 $("select").each(function () {
 $(this).change(function () {
 var subcotation = $(this).attr('id')
@@ -91,6 +91,29 @@ error: function () {}
 });
 })
 })
+
+// When you change your comments.
+
+$("textarea").each(function () {
+$(this).change(function () {
+var cotation = $(this).attr('id')
+var comments = $(this).val()
+console.log(comments)
+$.ajax({
+url: "/evaluationComments",
+type: 'get',
+data: {
+'comments': comments,
+'cotation': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+})
+
 })
 	</script>
 {% endblock %}

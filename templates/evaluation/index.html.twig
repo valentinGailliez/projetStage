@@ -24,6 +24,7 @@
 			<td>Nom de l'étudiant</td>
 			<td>Prénom de l'étudiant</td>
 			<td>Gerer ses évaluations</td>
+			<td>Archiver l'évaluation</td>
 		</thead>
 
 		<tbody>
@@ -34,6 +35,11 @@
 					<td>
 						<a class="btn btn-secondary" href="{{path('listEvaluation',{'id' : student.id,'idIntership':intership.id})}}">
 							gérer ses évaluations
+						</a>
+					</td>
+					<td>
+						<a class="btn btn-success" href="{{path('archiveEvaluation',{'id':student.id,'idIntership':intership.id})}}">
+							Archiver l'évaluation
 						</a>
 					</td>
 				</tr>

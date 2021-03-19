@@ -34,11 +34,24 @@ class Evaluation
      */
     private $globalEvaluation;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $dateCreation;
+
+    /**
+     * @ORM\Column(type="string", length=30)
+     */
+    private $state;
+
     public function __construct()
     {
         $this->cotation = new ArrayCollection();
     }
-
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
 
     public function getComments(): ?string
@@ -91,6 +104,30 @@ class Evaluation
     public function setGlobalEvaluation(?GlobalEvaluation $globalEvaluation): self
     {
         $this->globalEvaluation = $globalEvaluation;
+
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(?\DateTimeInterface $dateCreation): self
+    {
+        $this->dateCreation = $dateCreation;
+
+        return $this;
+    }
+
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    public function setState(string $state): self
+    {
+        $this->state = $state;
 
         return $this;
     }

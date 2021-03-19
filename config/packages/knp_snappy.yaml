@@ -1,9 +1,12 @@
 knp_snappy:
     pdf:
         enabled:    true
-        binary:     '%env(WKHTMLTOPDF_PATH)%'
-        options:    []
+        binary:     "\"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe\""
+        options:
+            no-outline: true
+            page-size: LETTER
+            encoding: UTF-8
     image:
         enabled:    true
-        binary:     '%env(WKHTMLTOIMAGE_PATH)%'
+        binary:     "'C:/wkhtmltopdf/wkhtmltoimage.exe'"
         options:    []
