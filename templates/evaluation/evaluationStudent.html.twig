@@ -1,10 +1,38 @@
-{% extends 'base.html.twig' %}
+{% block stylesheets %}
+	<!-- CSS only -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+{% endblock %}
 
+{% block javascripts %}
+
+	{{ encore_entry_script_tags('app') }}
+
+{% endblock %}
 {% block body %}
 	<br>
 	<div class="container">
+
+
 		<div class="row">
-			<input type='text' name="{{evaluation.id}}" placeholder="Sujet d'observation" value="{{evaluation.subject}}"/>
+			<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Nom et prénom de l'étudiant :
+						{{student.firstName}}
+						{{student.lastName}}
+					</label>
+				</h3>
+
+				<br>
+			</div>
+			<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Sujet d'évaluation :
+						{{evaluation.subject}}
+					</label>
+				</h3>
+
+				<br>
+			</div>
 			<table class="table table-striped">
 				<thead>
 					<td>Numéro de la compétence</td>
@@ -63,57 +91,7 @@
 				<textarea class="form-control" name="{{evaluation.id}}" rows="3">{{evaluation.comments}}</textarea>
 				<br>
 			</div>
-			{{form_start(form)}}
-			{{form_end(form)}}
 
 		</div>
 	</div>
-{% endblock %}
-
-{% block javascripts %}
-	{{parent()}}<script>
-
-		$(document).ready(function () { // When you change your cotation
-$("textarea").each(function () {
-$(this).change(function () {
-var evaluation = $(this).attr('name')
-var comments = $(this).val()
-console.log(comments)
-$.ajax({
-url: "/evaluationArchiveComments",
-type: 'get',
-data: {
-'comments': comments,
-'evaluation': evaluation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
-})
-})
-
-// when you change the subject
-$("input").each(function () {
-$(this).change(function () {
-var evaluation = $(this).attr('name')
-var subject = $(this).val()
-$.ajax({
-url: "/evaluationArchiveSubject",
-type: 'get',
-data: {
-'subject': subject,
-'evaluation': evaluation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
-})
-})
-
-});
-	</script>
 {% endblock %}

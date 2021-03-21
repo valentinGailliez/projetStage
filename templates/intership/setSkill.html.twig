@@ -21,9 +21,15 @@
 					<td>{{skill.domain.name}}</td>
 					<td>{{skill.skillNumber}}</td>
 					<td>
-						<button name="adding" class="{{skill.id}}">Ajouter</button>
+						{% if skill in intership.skills %}
+							<a class="btn btn-success" name="removing" id="{{skill.id}}">Supprimer</button>
+						{% else %}
+
+							<button class="btn btn-success" name="adding" id="{{skill.id}}">Ajouter</button>
+						{% endif %}
 
 						<button name="removing" class="{{skill.id}}">Supprimer</button>
+						<button name="adding" class="{{skill.id}}">Ajouter</button>
 					</td>
 				</tr>
 			</td>
@@ -32,21 +38,23 @@
 </table>{% endblock %}{% block javascripts %}
 {{parent()}}<script>
 	$(document).ready(function () {
-hideDeleteButton()
-
-$("button").each(function () {
+hidebtn()
+$("a").each(function () {
+console.log('hello')
 $(this).click(function () {
 
-var skill = $(this).attr('class')
+var skill = $(this).attr('id')
 switchbtn(skill);
 });
 });
 });
 
 function switchbtn(skill) {
-$('.' + skill + '').toggle()
+$('#' + skill + '').hide()
 if ($('.' + skill + '[name="adding"]').is(":visible")) {
-alert('button removing disparait')
+$('.' + skill + '[name="adding"]').hide()
+$('.' + skill + '[name="removing"]').show()
+
 $.ajax({
 url: "/intership/deleteSkill",
 type: 'get',
@@ -78,9 +86,9 @@ error: function () {}
 });
 }
 
-
 }
-function hideDeleteButton() {
-$("button[name='removing']").hide()
+function hidebtn() {
+console.log('ici')
+$('button').hide();
 }
 </script>{% endblock %}

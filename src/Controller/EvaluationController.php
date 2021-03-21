@@ -12,10 +12,12 @@ use App\Form\IntershipFormType;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
 use mikehaertl\wkhtmlto\Pdf as PDF;
+use Knp\Snappy\Pdf as Snappy;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -112,15 +114,15 @@ class EvaluationController extends AbstractController
 
 
             'student' => $student,
-            'cotations' => $cotations
+            'cotations' => $cotations,
         ]);
     }
 
     /**
-     * @Route("/evaluation/archive/{id}{idIntership}",name="archiveEvaluation")
+     * @Route("/evaluation/cloture/{id}{idIntership}",name="endEvaluation")
      *  @ParamConverter("intership", options={"id" = "idIntership"})
      */
-    public function archiveEvaluation(User $student, Intership $intership, Request $request)
+    public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
     {
         $form = $this->createForm(SubmitTypeFormType::class);
         $form->handleRequest($request);
@@ -140,7 +142,7 @@ class EvaluationController extends AbstractController
         }
         if ($nbCotationError != 0) {
             $this->addFlash('danger',  $nbCotationError . " sous-compétence(s) n'est/ne sont pas évaluée(s)");
-            return $this->redirectToRoute('viewEvaluation', ['id' => $intership->getId()]);
+            return $this->redirectToRoute('listEvaluation', ['id' => $student->getId(), 'idIntership' => $intership->getId()]);
         }
 
         $evaluationArchive = new Evaluation();
@@ -152,12 +154,19 @@ class EvaluationController extends AbstractController
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
                 if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
                     if ($form->isSubmitted()) {
-                        $page = $this->generateURL('archiveEvaluation', [
-                            'id' => $student->getId(),
-                            'idIntership' => $intership->getId()
+                        $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
+                            'student' => $student,
+                            'cotations' => $cotations,
+                            'evaluation' => $evaluation,
                         ]);
-                        $pdf = new PDF($page);
-                        $pdf->send('evaluation_de_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf');
+                        $snappy->setOption('header-left', 'Nom et prénom de l\'étudiant : ' . $student->getLastName() . ' ' . $student->getFirstName() . "\r\n" . "Réalisé à la HELHa");
+                        $snappy->setOption('header-line', true);
+                        $snappy->setOption('footer-center', 'Encodé par Mr/Mme Enseignant Enseignant');
+                        $snappy->setOption('footer-line', true);
+                        return new PdfResponse(
+                            $snappy->getOutputFromHtml($html),
+                            'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
+                        );
                     }
                     return $this->render('evaluation/generatePDF.html.twig', [
                         'student' => $student,
@@ -214,6 +223,17 @@ class EvaluationController extends AbstractController
     {
         $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id' => $request->get('evaluation')]);
         $evaluation->setComments($request->get('comments'));
+        $this->em->flush();
+        return new Response("test");
+    }
+
+    /**
+     * @Route("evaluationArchiveSubject",name="evaluationGlobalSubjects")
+     */
+    public function setSubject(Request $request)
+    {
+        $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id' => $request->get('evaluation')]);
+        $evaluation->setSubject($request->get('subject'));
         $this->em->flush();
         return new Response("test");
     }

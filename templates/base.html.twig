@@ -58,8 +58,11 @@
 
 						</ul>
 
-
+						{% if app.request.get('_route') == "listEvaluation" %}
+							<a class="btn btn-success" href="{{path('endEvaluation',{'id':student.id,'idIntership':cotations[0].intership.id})}}">Clôturer l'évaluation</a>
+						{% endif %}
 					</div>
+
 				</nav>
 				<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
 					{% for message in app.flashes("success") %}

@@ -112,6 +112,7 @@ class IntershipController extends AbstractController
 
         $intership->addSkill($skill);
         $this->em->flush();
+        return new Response('test');
     }
 
 
@@ -127,5 +128,6 @@ class IntershipController extends AbstractController
 
         $intership->removeSkill($skill);
         $this->em->flush();
+        return new Response('test');
     }
 }
