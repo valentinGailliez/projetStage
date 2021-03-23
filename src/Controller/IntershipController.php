@@ -14,6 +14,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
 class IntershipController extends AbstractController
 {
 
@@ -101,33 +103,25 @@ class IntershipController extends AbstractController
 
 
     /**
-     * @Route("/intership/addSkill",name="setSkill")
+     * @Route("/intership/addSkill/{id}/{idIntership}",name="setSkill")
+     * @ParamConverter("intership", options={"id" = "idIntership"})
      */
-    public function setSkill(Request $request)
+    public function setSkill(Skill $skill, Intership $intership)
     {
-
-        $skill = $this->em->getRepository(Skill::class)->findOneBy(['id' => $request->get('skill')]);
-        $intership = $this->em->getRepository(Intership::class)->findOneBy(['id' => $request->get('intership')]);
-
-
         $intership->addSkill($skill);
         $this->em->flush();
-        return new Response('test');
+        return $this->redirectToRoute('skillIntership', ['id' => $intership->getId()]);
     }
 
 
     /**
-     * @Route("/intership/deleteSkill",name="unsetSkill")
+     * @Route("/intership/deleteSkill/{id}/{idIntership}",name="unsetSkill")
+     * @ParamConverter("intership", options={"id" = "idIntership"})
      */
-    public function unsetSkill(Request $request)
+    public function unsetSkill(Skill $skill, Intership $intership, Request $request)
     {
-
-        $skill = $this->em->getRepository(Skill::class)->findOneBy(['id' => $request->get('skill')]);
-        $intership = $this->em->getRepository(Intership::class)->findOneBy(['id' => $request->get('intership')]);
-
-
         $intership->removeSkill($skill);
         $this->em->flush();
-        return new Response('test');
+        return $this->redirectToRoute('skillIntership', ['id' => $intership->getId()]);
     }
 }

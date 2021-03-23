@@ -22,73 +22,14 @@
 					<td>{{skill.skillNumber}}</td>
 					<td>
 						{% if skill in intership.skills %}
-							<a class="btn btn-success" name="removing" id="{{skill.id}}">Supprimer</button>
+							<a name="removing" class="btn btn-success" href="{{path('unsetSkill',{'id':skill.id,'idIntership':intership.id})}}">Supprimer</button>
 						{% else %}
 
-							<button class="btn btn-success" name="adding" id="{{skill.id}}">Ajouter</button>
+							<a name="adding" class="btn btn-success" href="{{path('setSkill',{'id':skill.id,'idIntership':intership.id})}}">Ajouter</button>
 						{% endif %}
-
-						<button name="removing" class="{{skill.id}}">Supprimer</button>
-						<button name="adding" class="{{skill.id}}">Ajouter</button>
 					</td>
 				</tr>
 			</td>
 		</tbody>
 	{% endfor %}
-</table>{% endblock %}{% block javascripts %}
-{{parent()}}<script>
-	$(document).ready(function () {
-hidebtn()
-$("a").each(function () {
-console.log('hello')
-$(this).click(function () {
-
-var skill = $(this).attr('id')
-switchbtn(skill);
-});
-});
-});
-
-function switchbtn(skill) {
-$('#' + skill + '').hide()
-if ($('.' + skill + '[name="adding"]').is(":visible")) {
-$('.' + skill + '[name="adding"]').hide()
-$('.' + skill + '[name="removing"]').show()
-
-$.ajax({
-url: "/intership/deleteSkill",
-type: 'get',
-data: {
-'skill': skill,
-'intership': {{ intership.id }}
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {
-alert("success");
-},
-error: function () {}
-});
-} else {
-$.ajax({
-url: "/intership/addSkill",
-type: 'get',
-data: {
-'skill': skill,
-'intership': {{ intership.id }}
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {
-alert("success");
-},
-error: function () {}
-});
-}
-
-}
-function hidebtn() {
-console.log('ici')
-$('button').hide();
-}
-</script>{% endblock %}
+</table>{% endblock %}
