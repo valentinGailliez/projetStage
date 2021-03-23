@@ -80,8 +80,7 @@ class EvaluationController extends AbstractController
         $cotations = [];
         $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership, 'user' => $student]);
         if ($cotations == null) {
-            $listSkill =  $this->em->getRepository(Skill::class)->findBy(array(), ['skillNumber' => 'ASC']);
-
+            $listSkill = $intership->getSkills();
             foreach ($listSkill as $skill) {
                 if (sizeof($skill->getSubSkills()) == 0) {
                     array_splice($listSkill, array_search($skill, $listSkill), 1);
