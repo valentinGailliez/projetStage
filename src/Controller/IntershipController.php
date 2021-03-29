@@ -30,13 +30,15 @@ class IntershipController extends AbstractController
     public function getList(Request $request): Response
     {
         $listIntership = $this->em->getRepository(Intership::class)->findAll();
-
+        $date = new DateTime();
+       
 
         if ($request->getMethod() == 'POST') {
             return $this->redirectToRoute('skillIntership');
         }
         return $this->render('intership/list.html.twig', [
-            'interships' => $listIntership
+            'interships' => $listIntership,
+            'date'=>$date
         ]);
     }
 
@@ -47,22 +49,34 @@ class IntershipController extends AbstractController
     {
         $intership = new Intership();
         $applications = $this->em->getRepository(ApplicationField::class)->findAll();
-
+$date=new Datetime();
 
         if ($request->getMethod() == 'POST') {
             $appli = $request->get('selectBloc');
             $firstday = new DateTime($request->get('first'));
             $lastday = new DateTime($request->get('end'));
-            $ansco = $request->get('ansco');
-
-
+            
+if($firstday< $date || $lastday <$date){
+    $this->addFlash("danger","Vous avez choisi des dates antérieures à la date actuelle");
+}
+else{
             if ($firstday > $lastday) {
                 $this->addFlash("danger", "Il y a une erreur dans vos dates");
             } else {
-                if ($firstday != "" && $lastday != "" && $ansco != "") {
+                if ($firstday != "" && $lastday != "") {
                     $this->addFlash("success", "Vous avez créé un stage.");
                     $application = $this->em->getRepository(ApplicationField::class)->findOneBy(["id" => $appli]);
                     $intership->setApplicationField($application);
+                    if($firstday->format('m')<=9){
+                        $firstansco = $firstday->format('Y')-1;
+                        $lastansco = $firstday->format('Y');
+                        $ansco = "{$firstansco}-{$lastansco}";
+                    }
+                    else{
+                        $firstansco = $firstday->format('Y');
+                        $lastansco = $firstday->format('Y')+1;
+                        $ansco = "{$firstansco}-{$lastansco}";
+                    }
                     $intership->setAnsco($ansco);
                     $intership->setFirstDay($firstday);
                     $intership->setLastDay($lastday);
@@ -76,15 +90,83 @@ class IntershipController extends AbstractController
                     $intership->setEctsCode($codeEcts);
                     $this->em->persist($intership);
                     $this->em->flush();
+                    return $this->redirectToRoute('intership');
+                } else $this->addFlash("danger", "Veuillez compléter toutes les données");
+            }
+        }
+    }
+
+        return $this->render('intership/create.html.twig', [
+
+            'applis' => $applications,
+            "date"=>$date
+        ]);
+    }
+
+/**
+     * @Route("/intership/update/{id}", name="updateIntership")
+     */
+    public function update(Intership $intership,Request $request): Response
+    {
+        $date = new DateTime();
+        $applications = $this->em->getRepository(ApplicationField::class)->findAll();
+
+
+        if ($request->getMethod() == 'POST') {
+            $appli = $request->get('selectBloc');
+            $firstday = new DateTime($request->get('first'));
+            $lastday = new DateTime($request->get('end'));
+            
+
+            if ($firstday > $lastday) {
+                $this->addFlash("danger", "Il y a une erreur dans vos dates");
+            } else {
+                if ($firstday != "" && $lastday != "") {
+                    $this->addFlash("success", "Vous avez créé un stage.");
+                    $application = $this->em->getRepository(ApplicationField::class)->findOneBy(["id" => $appli]);
+                    $intership->setApplicationField($application);
+                    if($firstday->format('m')<=9){
+                        $firstansco = $firstday->format('Y')-1;
+                        $lastansco = $firstday->format('Y');
+                        $ansco = "{$firstansco}-{$lastansco}";
+                    }
+                    else{
+                        $firstansco = $firstday->format('Y');
+                        $lastansco = $firstday->format('Y')+1;
+                        $ansco = "{$firstansco}-{$lastansco}";
+                    }
+                    $intership->setAnsco($ansco);
+                    $intership->setFirstDay($firstday);
+                    $intership->setLastDay($lastday);
+                    $applicationParent = $application;
+                    $codeEcts = "";
+                    $codeEcts .= $applicationParent->getCode();
+                    while ($applicationParent->getType() != "department") {
+                        $applicationParent = $applicationParent->getParent();
+                        $codeEcts .= $applicationParent->getCode();
+                    }
+                    $intership->setEctsCode($codeEcts);
+                    $this->em->flush();
                 } else $this->addFlash("danger", "Veuillez compléter toutes les données");
             }
         }
 
-        return $this->render('intership/create.html.twig', [
+        return $this->render('intership/update.html.twig', [
 
-            'applis' => $applications
+            'applis' => $applications,
+            'intership'=>$intership,
+            'date'=>$date
         ]);
     }
+/**
+ * @Route("/intership/delete",name="deleteIntership")
+ */
+public function delete(Request $request){
+$intership = $this->em->getRepository(Intership::class)->findOneby(['id'=>$request->get('intership')]);
+$this->em->remove($intership);
+$this->em->flush();
+}
+
     /**
      * @Route ("/intership/skill/{id}",name="skillIntership")
      */
@@ -94,7 +176,7 @@ class IntershipController extends AbstractController
         while ($applicationParent->getType() != "category") {
             $applicationParent = $applicationParent->getParent();
         }
-        $skills = $this->em->getRepository(Skill::class)->findBy(['domain' => $applicationParent]);
+        $skills = $this->em->getRepository(Skill::class)->findBy(['domain' => $applicationParent], ['skillNumber' => 'ASC']);
         return $this->render('intership/setSkill.html.twig', [
             'skills' => $skills,
             'intership' => $intership

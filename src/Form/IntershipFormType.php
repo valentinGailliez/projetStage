@@ -16,7 +16,6 @@ class IntershipFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('ansco', TextType::class)
             ->add('firstDay', DateType::class)
             ->add('lastDay', DateType::class);
     }

@@ -15,8 +15,8 @@
 
 					</thead>
 					<tbody>
-						<td><input type="date" name="first" class="input-group date" id="first"/></td>
-						<td><input type="date" name="end" class="input-group date" id="end"/></td>
+						<td><input type="date" name="first" class="input-group date" value="{{intership.firstday|date('Y-m-d')}}" id="first"/></td>
+						<td><input type="date" name="end" class="input-group date"value="{{intership.lastday|date('Y-m-d')}}" id="end"/></td>
 					</tbody>
 				</tbody>
 			</table>
@@ -38,7 +38,7 @@
 			<select id="selectSubSection"></select>
 			<select id="selectBloc" name="selectBloc"></select>
 			<button type="submit" id="btnSubmit" class="btn btn-success">
-				Créer stage</button>
+				Modifier stage</button>
 		</form>
 	</div>
 	<div class="row">

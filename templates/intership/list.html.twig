@@ -23,27 +23,27 @@
 		<table class="table table-striped">
 			<thead>
 				<td>Domaine</td>
-				<td>Departement</td>
 				<td>Lieu</td>
-				<td>Section / sous-section</td>
+				<td>Section / Sous-section</td>
 				<td>Bloc</td>
-				<td>Début de stage - Fin de stage</td>
+				<td>Période de stage</td>
 				<td>Année académique</td>
+				<td>Attribuer des compétences</td>
+				<td>Modifier le stage</td>
+				<td>Supprimer le stage</td>
 			</thead>
 			<tbody>
 				<tr>
 					{% for intership in interships %}
 						{% if intership.applicationField.parent.type != "sub_section" %}
-							<td id="{{intership.id}}">{{intership.applicationField.parent.parent.parent.parent.name}}</td>
-							<td>{{intership.applicationField.parent.parent.parent.name}}</td>
-
+							<td >{{intership.applicationField.parent.parent.parent.parent.name}}</td>
+							
 							<td>{{intership.applicationField.parent.parent.name}}</td>
 							<td>
 								{{intership.applicationField.parent.name}}</td>
 						{% else %}
 							<td>{{intership.applicationField.parent.parent.parent.parent.parent.name}}</td>
-							<td>{{intership.applicationField.parent.parent.parent.parent.name}}</td>
-
+							
 							<td>{{intership.applicationField.parent.parent.parent.name}}</td>
 							<td>{{intership.applicationField.parent.parent.name}}
 								/
@@ -55,34 +55,53 @@
 							-
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
+						{% if date < intership.firstday %}
+						<td><a class="btn btn-success" href="{{path('skillIntership',{'id':intership.id})}}">Attribuer des compétences</a></td>
+						<td><a class="btn btn-success" href="{{path('updateIntership',{'id':intership.id})}}">Modifier le stage</a></td>
+						<td><a class="btn btn-warning" name="delete"id="{{intership.id}}">Supprimer le stage</a></td>
+						{% else %}
+						<td><b> Vous ne pouvez pas attribuer de compétences</b></td>
+							<td><b>Stage Non Modifiable</b></td>
+							<td><b>Stage Non Supprimable</b></td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			</tbody>
 		</tbody>
 	</table>
-	<a class="btn btn-warning" href="{{path('createIntership')}}">creer un stage</a>
-</div>{% endblock %}{% block javascripts %}
+	<a class="btn btn-warning" href="{{path('createIntership')}}">Créer un stage</a>
+</div>{% endblock %}
+{% block javascripts %}
 {{parent()}}<script>
 	$(document).ready(function () {
-$("tr").each(function () {
-$(this).click(function () {
-var intership = $(this).children().attr('id')
-click(intership);
+		$("a").each(function(){
+			$(this).click(function(){
+				var classBtn=$(this).attr('name')
+		
+				if(classBtn =="delete"){
+					var intership = $(this).attr('id')
+					    		if(confirm('Voulez vous supprimer ce stage? ')){
+				$.ajax({
+url: "/intership/delete",
+type: 'get',
+data: {
+'intership':intership
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
 });
-});
-});
+location.reload()
+			}
+			else{
+				alert('je suis ici')
+			}
+
+				}
+		});
+	})
 
 
-function click(intership) {
-jsonString = JSON.stringify(intership);{% for intership in interships %}if ("{{ intership.id }}" == intership) {
-window.location.href = "{{ path('skillIntership',{'id':intership.id}) }}";
-}
-{% endfor %}
-$.ajax({
-type: "POST",
-url: "/intership",
-data: "data=" + jsonString
-
 });
-}
 </script>{% endblock %}
