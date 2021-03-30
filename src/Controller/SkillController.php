@@ -46,10 +46,16 @@ class SkillController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->em->persist($skill);
-            $this->em->flush();
-            $this->addFlash("success", "La compétence a bien été créée.");
-            return $this->redirectToRoute("accueilSkill");
+            $skills = $this->em->getRepository(Skill::class)->findOneBy(["domain"=>$skill->getDomain()->getId(),"skillNumber"=>$skill->getSkillNumber()]);
+            if($skills == null){
+                $this->em->persist($skill);
+                $this->em->flush();
+                $this->addFlash("success", "La compétence a bien été créée.");
+                return $this->redirectToRoute("accueilSkill");
+            }
+            else{
+                $this->addFlash("danger","Ce numéro de compétence est déjà attribué dans ce domaine");
+            }
         }
         return $this->render('skill/createSkill.html.twig', [
             'form' => $form->createView(),
@@ -66,11 +72,16 @@ class SkillController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            $skills = $this->em->getRepository(Skill::class)->findOneBy(["domain"=>$skill->getDomain()->getId(),"skillNumber"=>$skill->getSkillNumber()]);
+            if($skills == null){
 
             $this->em->flush();
             $this->addFlash("success", "La compétence a bien été modifiée.");
             return $this->redirectToRoute("accueilSkill");
+        }
+        else{
+            $this->addFlash("danger","Ce numéro de compétence est déjà attribué dans ce domaine . La compétence n'est pas modifiée");
+        }
         }
         return $this->render('skill/updateSkill.html.twig', [
             'form' => $form->createView(),

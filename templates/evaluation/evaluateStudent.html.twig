@@ -9,7 +9,7 @@
 	<div class="container">
 		<div class="row">
 			<h1>
-				Evaluation de
+				Évaluation de
 				{{student.lastname}}
 				{{student.firstname}}
 			</h1>
@@ -41,7 +41,7 @@
 			</table>
 			{{form_widget(form.comments)}}
 			{{form_row(form.save)}}
-			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':student.id})}}">revenir aux compétences</a>
+			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':student.id})}}">Revenir à la liste des étudiants</a>
 		</div>
 	</div>
 	{{form_end(form)}}

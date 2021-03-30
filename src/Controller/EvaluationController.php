@@ -2,17 +2,18 @@
 
 namespace App\Controller;
 
+use DateTime;
 use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\Cotation;
 use App\Entity\SubSkill;
 use App\Entity\Intership;
 use App\Entity\Evaluation;
+use Knp\Snappy\Pdf as Snappy;
 use App\Form\IntershipFormType;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
 use mikehaertl\wkhtmlto\Pdf as PDF;
-use Knp\Snappy\Pdf as Snappy;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -54,7 +55,7 @@ class EvaluationController extends AbstractController
             $added = 0;
             foreach ($evaluations as $evaluation) {
                 foreach ($evaluation->getCotation() as $cotation) {
-                    if ($student == $cotation->getUser() && $cotation->getIntership() == $intership && $evaluation->getDateCreation() != null) {
+                    if ($student == $cotation->getUser() && $cotation->getIntership() == $intership && $evaluation->getState() == "Fini") {
                         $added = 1;
                     }
                 }
@@ -79,6 +80,19 @@ class EvaluationController extends AbstractController
     {
         $cotations = [];
         $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership, 'user' => $student]);
+        $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
+        $evaluationArchive = new Evaluation();
+        foreach($evaluations as $evaluation){
+            
+            if($evaluation == $cotations[0]->getEvaluation()){
+                
+                return $this->render('evaluation/createEvaluation.html.twig', [
+                    'student' => $student,
+                    'cotations' => $cotations,
+                    'evaluation'=>$evaluation
+                ]);
+            }
+        }
         if ($cotations == null) {
             $listSkill = $intership->getSkills();
             foreach ($listSkill as $skill) {
@@ -92,7 +106,7 @@ class EvaluationController extends AbstractController
                     }
                 }
             }
-
+            $evaluationArchive->setState("Modification");
             foreach ($listSkill as $skill) {
                 $cotation = new Cotation();
                 $cotation->setUser($student);
@@ -104,9 +118,16 @@ class EvaluationController extends AbstractController
                     $subCotation->setCotation(0);
                     $cotation->addSubskillcotation($subCotation);
                 }
-                array_push($cotations, $cotation);
+                array_push($cotations,$cotation);
                 $this->em->persist($cotation);
+                $this->em->flush();
+                
             }
+            foreach ($cotations as $cotation) {
+               $evaluationArchive->addCotation($cotation);
+            }
+    
+            $this->em->persist($evaluationArchive);
             $this->em->flush();
         }
         return $this->render('evaluation/createEvaluation.html.twig', [
@@ -114,11 +135,12 @@ class EvaluationController extends AbstractController
 
             'student' => $student,
             'cotations' => $cotations,
+            'evaluation'=>$evaluation
         ]);
     }
 
     /**
-     * @Route("/evaluation/cloture/{id}{idIntership}",name="endEvaluation")
+     * @Route("/evaluation/cloture/{id}/{idIntership}",name="endEvaluation")
      *  @ParamConverter("intership", options={"id" = "idIntership"})
      */
     public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
@@ -177,12 +199,6 @@ class EvaluationController extends AbstractController
             }
         }
 
-        foreach ($cotations as $cotation) {
-            $evaluationArchive->addCotation($cotation);
-        }
-
-        $this->em->persist($evaluationArchive);
-        $this->em->flush();
 
         return $this->render('evaluation/generatePDF.html.twig', [
             'student' => $student,
@@ -233,6 +249,17 @@ class EvaluationController extends AbstractController
     {
         $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id' => $request->get('evaluation')]);
         $evaluation->setSubject($request->get('subject'));
+        $this->em->flush();
+        return new Response("test");
+    }
+
+    /**
+     * @Route("evaluationArchiveDate",name="evaluationGlobalDate")
+     */
+    public function setDate(Request $request)
+    {
+        $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id' => $request->get('evaluation')]);
+        $evaluation->setDateCreation(new DateTime($request->get('date')));
         $this->em->flush();
         return new Response("test");
     }
