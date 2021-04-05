@@ -3,8 +3,24 @@
 {% block body %}
 	<br>
 	<div class="container">
+	<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Information Stage :<br>
+						Intervalle de stage : {{intership.firstday| date('d/m/Y')}} - {{intership.lastday| date('d/m/Y')}}
+					</label>
+				</h3>
+				<h3>
+					<label for="exampleFormControlTextarea5">Date de visite :
+						{{evaluation.dateCreation | date('d/m/Y')}}
+					</label>
+				</h3>
+
+				<br>
+			</div>
 		<div class="row">
-			<input type='text' name="{{evaluation.id}}" disabled placeholder="Sujet d'observation" value="{{evaluation.subject}}"/>
+			Sujet d'évaluation :  <input type='text' disabled placeholder="Sujet d'observation" value="{{evaluation.subject}}"/>
+			Date de visite : <input type='text'  disabled  value="{{evaluation.dateCreation | date('d-m-Y')}}"/>
+			
 			<table class="table table-striped">
 				<thead>
 					<td>Numéro de la compétence</td>
@@ -65,7 +81,7 @@
 			</div>
 			{{form_start(form)}}
 			{{form_end(form)}}
-
+			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Revenir à son évaluation</a>
 		</div>
 	</div>
 {% endblock %}

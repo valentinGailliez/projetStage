@@ -14,7 +14,9 @@ use App\Form\IntershipFormType;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
 use mikehaertl\wkhtmlto\Pdf as PDF;
+use Symfony\Component\Mailer\MailerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,10 +28,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 class EvaluationController extends AbstractController
 {
 
-    private $em;
-    public function __construct(EntityManagerInterface $entityManager)
+    private $em,$mailer;
+    public function __construct(EntityManagerInterface $entityManager,MailerInterface $mailer)
     {
         $this->em = $entityManager;
+        $this->mailer=$mailer;
     }
 
 
@@ -83,15 +86,15 @@ class EvaluationController extends AbstractController
         $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
         $evaluationArchive = new Evaluation();
         foreach($evaluations as $evaluation){
-            
+            if(count($cotations) >=1){
             if($evaluation == $cotations[0]->getEvaluation()){
                 
                 return $this->render('evaluation/createEvaluation.html.twig', [
                     'student' => $student,
-                    'cotations' => $cotations,
                     'evaluation'=>$evaluation
                 ]);
             }
+        }
         }
         if ($cotations == null) {
             $listSkill = $intership->getSkills();
@@ -134,7 +137,6 @@ class EvaluationController extends AbstractController
 
 
             'student' => $student,
-            'cotations' => $cotations,
             'evaluation'=>$evaluation
         ]);
     }
@@ -145,6 +147,9 @@ class EvaluationController extends AbstractController
      */
     public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
     {
+        
+
+
         $form = $this->createForm(SubmitTypeFormType::class);
         $form->handleRequest($request);
         $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId(), 'intership' => $intership->getId()]);
@@ -166,46 +171,47 @@ class EvaluationController extends AbstractController
             return $this->redirectToRoute('listEvaluation', ['id' => $student->getId(), 'idIntership' => $intership->getId()]);
         }
 
-        $evaluationArchive = new Evaluation();
-        $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId(), 'intership' => $intership->getId()]);
-        $evaluationArchive->setState("Modification");
         $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
 
         foreach ($evaluations as $evaluation) {
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
                 if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
-                    if ($form->isSubmitted()) {
-                        $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
+
+                    if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
+                        if ($form->isSubmitted()) {
+                            $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
+                                'student' => $student,
+                                'cotations' => $cotations,
+                                'evaluation' => $evaluation,
+                                'intership'=>$intership
+                            ]);
+                            $snappy->setOption('header-left', 'Nom et prénom de l\'étudiant : ' . $student->getLastName() . ' ' . $student->getFirstName() . "\r\n" . "Réalisé à la HELHa");
+                            $snappy->setOption('header-line', true);
+                            $snappy->setOption('footer-center', 'Encodé par Mr/Mme Enseignant Enseignant');
+                            $snappy->setOption('footer-line', true);
+                            $evaluation->setState("Fini");
+                            $this->em->flush();
+                            $this->notify($evaluation);
+                            return new PdfResponse(
+                                $snappy->getOutputFromHtml($html),
+                                'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
+                            );
+                        }
+                        return $this->render('evaluation/generatePDF.html.twig', [
                             'student' => $student,
                             'cotations' => $cotations,
                             'evaluation' => $evaluation,
+                            'intership'=>$intership,
+                            'form' => $form->createView()
                         ]);
-                        $snappy->setOption('header-left', 'Nom et prénom de l\'étudiant : ' . $student->getLastName() . ' ' . $student->getFirstName() . "\r\n" . "Réalisé à la HELHa");
-                        $snappy->setOption('header-line', true);
-                        $snappy->setOption('footer-center', 'Encodé par Mr/Mme Enseignant Enseignant');
-                        $snappy->setOption('footer-line', true);
-                        return new PdfResponse(
-                            $snappy->getOutputFromHtml($html),
-                            'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
-                        );
                     }
-                    return $this->render('evaluation/generatePDF.html.twig', [
-                        'student' => $student,
-                        'cotations' => $cotations,
-                        'evaluation' => $evaluation,
-                        'form' => $form->createView()
-                    ]);
+                    $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
+                    return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);
+                    
                 }
             }
         }
-
-
-        return $this->render('evaluation/generatePDF.html.twig', [
-            'student' => $student,
-            'cotations' => $cotations,
-            'evaluation' => $evaluationArchive,
-            'form' => $form->createView()
-        ]);
+     
     }
 
     /**
@@ -262,5 +268,20 @@ class EvaluationController extends AbstractController
         $evaluation->setDateCreation(new DateTime($request->get('date')));
         $this->em->flush();
         return new Response("test");
+    }
+
+    public function notify($evaluation){
+        $email = (new TemplatedEmail())
+            ->from('no-reply@helha.be')
+            ->to('la188991@student.helha.be')
+            ->subject('Test d\'envoi de mail')
+            ->htmlTemplate('evaluation/evaluationStudent.html.twig')
+            ->context(['student' => $evaluation->getCotation()[0]->getUser(),
+            'cotations' => $evaluation->getCotation(),
+            'evaluation' => $evaluation,
+            'intership'=>$evaluation->getCotation()[0]->getIntership()
+            ]);
+
+            $this->mailer->send($email);
     }
 }

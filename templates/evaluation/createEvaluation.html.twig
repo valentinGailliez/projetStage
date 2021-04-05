@@ -18,7 +18,7 @@
 Date de la visite :
 <input type='date' id="date" name="{{evaluation.id}}" value="{{evaluation.dateCreation | date('Y-m-d')}}"/>			
 
-			{% for cotation in cotations%}
+			{% for cotation in evaluation.cotation%}
 				{% set indexSkill = loop.index0 %}
 
 				<h2>

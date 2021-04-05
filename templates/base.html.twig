@@ -59,7 +59,7 @@
 						</ul>
 
 						{% if app.request.get('_route') == "listEvaluation" %}
-							<a class="btn btn-success" href="{{path('endEvaluation',{'id':student.id,'idIntership':cotations[0].intership.id})}}">Clôturer l'évaluation</a>
+							<a class="btn btn-success" href="{{path('endEvaluation',{'id':student.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
 						{% endif %}
 					</div>
 

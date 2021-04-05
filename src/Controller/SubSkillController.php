@@ -41,13 +41,19 @@ class SubSkillController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
+            if($this->em->getRepository(SubSkill::class)->findOneBy(['skill'=>$skill->getId(),'number'=>$subSkill->getNumber()])==null){
             $subSkill->setSkill($skill);
             $this->em->persist($subSkill);
             $this->em->flush();
+            $this->addFlash("success", "La sous-compétence a bien été créée.");
+                
             return $this->redirectToRoute("accueilSubSkill", [
                 'id' => $skill->getId()
             ]);
+            }
+            else{
+                $this->addFlash("danger","Ce numéro de sous-compétence est déjà attribué dans cette compétence");
+            }
         }
         return $this->render('sub_skill/createSubSkill.html.twig', [
             'form' => $form->createView(),
@@ -77,12 +83,18 @@ class SubSkillController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
-
+            if($this->em->getRepository(SubSkill::class)->findOneBy(['skill'=>$subSkill->getSkill()->getId(),'number'=>$subSkill->getNumber()])==null){
+           
+                $this->addFlash("success", "La sous-compétence a bien été modifiée.");
+           
             $this->em->flush();
             return $this->redirectToRoute("accueilSubSkill", [
                 'id' => $subSkill->getSkill()->getId()
             ]);
+            }
+            else{
+                $this->addFlash("danger","Ce numéro de sous-compétence est déjà attribué dans ce domaine . La sous-compétence n'est pas modifiée");
+            }
         }
         return $this->render('sub_skill/updateSubSkill.html.twig', [
             'form' => $form->createView(),
