@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use DateTime;
+use App\Entity\User;
 use App\Entity\Skill;
 use App\Entity\Intership;
 use App\Form\IntershipFormType;
@@ -12,8 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Date;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class IntershipController extends AbstractController
@@ -183,6 +184,21 @@ $this->em->flush();
         ]);
     }
 
+/**
+ * @Route ("/intership/referent/{id}",name="referentIntership")
+ */
+public function listReferent(Intership $intership, Request $request){
+    $applicationParent = $intership->getApplicationField();
+    while ($applicationParent->getType() != "category") {
+        $applicationParent = $applicationParent->getParent();
+    }
+    $referent = $this->em->getRepository(User::class)->findBy(['applicationField' => $applicationParent], ['lastname' => 'ASC']);
+    return $this->render('intership/setReferent.html.twig', [
+        'referents' => $referent,
+        'intership' => $intership
+    ]);
+}
+
 
     /**
      * @Route("/intership/addSkill/{id}/{idIntership}",name="setSkill")
@@ -205,5 +221,29 @@ $this->em->flush();
         $intership->removeSkill($skill);
         $this->em->flush();
         return $this->redirectToRoute('skillIntership', ['id' => $intership->getId()]);
+    }
+
+    
+    /**
+     * @Route("/intership/addReferent/{id}/{idIntership}",name="setReferent")
+     * @ParamConverter("intership", options={"id" = "idIntership"})
+     */
+    public function setReferent(User $referent, Intership $intership)
+    {
+        $intership->addReferent($referent);
+        $this->em->flush();
+        return $this->redirectToRoute('referentIntership', ['id' => $intership->getId()]);
+    }
+
+
+    /**
+     * @Route("/intership/deleteReferent/{id}/{idIntership}",name="unsetReferent")
+     * @ParamConverter("intership", options={"id" = "idIntership"})
+     */
+    public function unsetReferent(User $referent, Intership $intership, Request $request)
+    {
+        $intership->removeReferent($referent);
+        $this->em->flush();
+        return $this->redirectToRoute('referentIntership', ['id' => $intership->getId()]);
     }
 }

@@ -51,10 +51,16 @@ class User
      */
     private $applicationField;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Intership::class, mappedBy="referents")
+     */
+    private $interships;
+
 
     public function __construct()
     {
         $this->intership = new ArrayCollection();
+        $this->interships = new ArrayCollection();
     }
 
 
@@ -148,5 +154,13 @@ class User
         $this->applicationField = $applicationField;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Intership[]
+     */
+    public function getInterships(): Collection
+    {
+        return $this->interships;
     }
 }

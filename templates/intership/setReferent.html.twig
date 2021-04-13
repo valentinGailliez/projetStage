@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nommer les Référents à ce stage
+{% endblock %}
+{% block body %}
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Nommer les référents à ce stage</div>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<td>Listes des référents</td>
+			
+			<td>Ajouter / Enlever le référent à ce stage</td>
+		</thead>
+
+		<tbody>
+			{% for referent in referents%}
+				<tr>
+					<td>{{referent.lastname}} {{referent.firstname}}</td>
+					<td>
+						{% if referent in intership.referents %}
+							<a name="removing" class="btn btn-success" href="{{path('unsetReferent',{'id':referent.id,'idIntership':intership.id})}}">Supprimer</button>
+						{% else %}
+
+							<a name="adding" class="btn btn-success" href="{{path('setReferent',{'id':referent.id,'idIntership':intership.id})}}">Ajouter</button>
+						{% endif %}
+					</td>
+				</tr>
+			</td>
+		</tbody>
+	{% endfor %}
+</table>{% endblock %}

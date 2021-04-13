@@ -271,9 +271,10 @@ class EvaluationController extends AbstractController
     }
 
     public function notify($evaluation){
-        $email = (new TemplatedEmail())
+        foreach($evaluation->getCotation()[0]->getIntership()->getReferents() as $referent){
+            $email = (new TemplatedEmail())
             ->from('no-reply@helha.be')
-            ->to('la188991@student.helha.be')
+            ->to($referent->getMail())
             ->subject('Test d\'envoi de mail')
             ->htmlTemplate('evaluation/evaluationStudent.html.twig')
             ->context(['student' => $evaluation->getCotation()[0]->getUser(),
@@ -283,5 +284,7 @@ class EvaluationController extends AbstractController
             ]);
 
             $this->mailer->send($email);
+        }
+
     }
 }

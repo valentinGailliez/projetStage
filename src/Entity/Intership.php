@@ -51,9 +51,15 @@ class Intership
      */
     private $skills;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="interships")
+     */
+    private $referents;
+
     public function __construct()
     {
         $this->skills = new ArrayCollection();
+        $this->referents = new ArrayCollection();
     }
 
 
@@ -145,6 +151,30 @@ class Intership
     public function removeSkill(Skill $skill): self
     {
         $this->skills->removeElement($skill);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getReferents(): Collection
+    {
+        return $this->referents;
+    }
+
+    public function addReferent(User $referent): self
+    {
+        if (!$this->referents->contains($referent)) {
+            $this->referents[] = $referent;
+        }
+
+        return $this;
+    }
+
+    public function removeReferent(User $referent): self
+    {
+        $this->referents->removeElement($referent);
 
         return $this;
     }
