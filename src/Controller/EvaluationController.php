@@ -4,24 +4,22 @@ namespace App\Controller;
 
 use DateTime;
 use App\Entity\User;
-use App\Entity\Skill;
 use App\Entity\Cotation;
 use App\Entity\SubSkill;
 use App\Entity\Intership;
 use App\Entity\Evaluation;
 use Knp\Snappy\Pdf as Snappy;
-use App\Form\IntershipFormType;
+use App\Form\FileSendFormType;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
-use mikehaertl\wkhtmlto\Pdf as PDF;
-use Symfony\Component\Mailer\MailerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Annotation\Route;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
@@ -90,7 +88,6 @@ class EvaluationController extends AbstractController
             if($evaluation == $cotations[0]->getEvaluation()){
                 
                 return $this->render('evaluation/createEvaluation.html.twig', [
-                    'student' => $student,
                     'evaluation'=>$evaluation
                 ]);
             }
@@ -98,15 +95,13 @@ class EvaluationController extends AbstractController
         }
         if ($cotations == null) {
             $listSkill = $intership->getSkills();
+            
             foreach ($listSkill as $skill) {
                 if (sizeof($skill->getSubSkills()) == 0) {
                     array_splice($listSkill, array_search($skill, $listSkill), 1);
                 } else {
-                    $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
-                    foreach ($listSubSkill as $subSkill) {
-                        $skill->removeSubSkill($subSkill);
-                        $skill->addSubSkill($subSkill);
-                    }
+                       $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
+                   
                 }
             }
             $evaluationArchive->setState("Modification");
@@ -134,10 +129,7 @@ class EvaluationController extends AbstractController
             $this->em->flush();
         }
         return $this->render('evaluation/createEvaluation.html.twig', [
-
-
-            'student' => $student,
-            'evaluation'=>$evaluation
+             'evaluation'=>$evaluationArchive
         ]);
     }
 
@@ -180,15 +172,12 @@ class EvaluationController extends AbstractController
                     if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
                         if ($form->isSubmitted()) {
                             $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
-                                'student' => $student,
-                                'cotations' => $cotations,
-                                'evaluation' => $evaluation,
-                                'intership'=>$intership
+                                'evaluation' => $evaluation
                             ]);
-                            $snappy->setOption('header-left', 'Nom et prénom de l\'étudiant : ' . $student->getLastName() . ' ' . $student->getFirstName() . "\r\n" . "Réalisé à la HELHa");
+                            $snappy->setOption('header-left',"Encodé par Mr/Mme Enseignant Enseignant");
                             $snappy->setOption('header-line', true);
-                            $snappy->setOption('footer-center', 'Encodé par Mr/Mme Enseignant Enseignant');
                             $snappy->setOption('footer-line', true);
+                            $snappy->setOption('footer-center','Page [page] of [topage]');
                             $evaluation->setState("Fini");
                             $this->em->flush();
                             $this->notify($evaluation);
@@ -198,10 +187,7 @@ class EvaluationController extends AbstractController
                             );
                         }
                         return $this->render('evaluation/generatePDF.html.twig', [
-                            'student' => $student,
-                            'cotations' => $cotations,
                             'evaluation' => $evaluation,
-                            'intership'=>$intership,
                             'form' => $form->createView()
                         ]);
                     }
@@ -213,6 +199,68 @@ class EvaluationController extends AbstractController
         }
      
     }
+
+    /**
+     *  @Route("/evaluation/cloture/{id}",name="viewCloturedEvaluation")
+     */
+    public function viewFinishedEvaluation(Intership $intership){
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(["state"=>"Fini"]);
+        foreach($evaluations as $evaluation){
+            if($evaluation->getCotation()[0]->getIntership() != $intership){
+                array_splice($evaluations, array_search($evaluation, $evaluations), 1);
+            }
+        }
+        return $this->render('evaluation/listFinishedEvaluation.html.twig', [
+            'evaluations' => $evaluations,
+            
+        ]);
+    }
+
+
+    /**
+     * @Route("/evaluation/{id}",name="viewStudentEvaluation")
+     */
+    public function viewStudentEvaluation(Evaluation $evaluation){
+        return $this->render('evaluation/evaluateStudent.html.twig',[
+            'evaluation'=>$evaluation
+        ]);
+    }
+
+    /**
+     * @Route("/evaluation/etudiant/intership",name="studentEvaluationIntership")
+     */
+    public function listEvaluationStudent():Response{
+        $listIntership = $this->em->getRepository(Intership::class)->findAll();
+        return $this->render('evaluation_student/listIntership.html.twig', [
+            'interships' => $listIntership
+        ]);
+    }
+
+
+    /**
+     * @Route("/evaluation/etudiant/{id}",name="sendDocument")
+     */
+    public function sendDocument(Intership $intership,Request $request){
+        $form = $this->createForm(FileSendFormType::class);
+        $form->handleRequest($request);
+        if($form->isSubmitted()){
+            
+            dd($request->files->get('file_send_form'));
+        }
+        return $this->render('evaluation_student/sendDocument.html.twig',[
+            'intership'=>$intership,
+            'form'=>$form->createView()
+        ]);
+    }
+
+
+
+
+
+
+
+
+    //Les méthodes suivantes ne renvoient pas de page. Elles agissent lors d'une interaction avec la page
 
     /**
      * @Route("evaluation",name="evaluationSubSkill")
@@ -286,5 +334,16 @@ class EvaluationController extends AbstractController
             $this->mailer->send($email);
         }
 
+    }
+
+    function orderByDate($a, $b) {
+        //retourner 0 en cas d'égalité
+        if ($a->getSkillNumber() == $b->getSkillNumber()) {
+            return 0;
+        } else if ($a->getSkillNumber() < $b->getSkillNumber()) {//retourner -1 en cas d’infériorité
+            return -1;
+        } else {//retourner 1 en cas de supériorité
+            return 1;
+        }
     }
 }

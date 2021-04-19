@@ -52,14 +52,23 @@
 								</a>
 								<a class="nav-link active" aria-current="page" href="{{path('viewEvaluationIntership')}}">
 									<span data-feather="home"></span>
-									Evaluation
+									Evaluation (Enseignant-Visiteur)
+								</a>
+								<a class="nav-link active" aria-current="page" href="{{path('studentEvaluationIntership')}}">
+									<span data-feather="home"></span>
+									Evaluation (Etudiant)
 								</a>
 							</li>
 
 						</ul>
 
 						{% if app.request.get('_route') == "listEvaluation" %}
-							<a class="btn btn-success" href="{{path('endEvaluation',{'id':student.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
+							<a class="btn btn-success" href="{{path('endEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
+							{% else %}
+								{% if app.request.get('_route') == "viewStudentEvaluation" %}
+								<a class="btn btn-success" href="{{path('viewCloturedEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Retourner à la page précédente</a>
+								{% endif %}
+								
 						{% endif %}
 					</div>
 

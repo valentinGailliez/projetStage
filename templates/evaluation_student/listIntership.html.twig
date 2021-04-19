@@ -16,7 +16,7 @@
 				<td>Bloc</td>
 				<td>Début de stage - Fin de stage</td>
 				<td>Année académique</td>
-				<td>Accéder aux étudiants</td>
+				<td>Envoyer un/plusieurs document(s)</td>
 			</thead>
 			<tbody>
 
@@ -43,7 +43,7 @@
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
 						<td>
-							<a class="btn btn-success" href="{{path('viewEvaluation',{'id':intership.id})}}">Accéder aux étudiants</a>
+							<a class="btn btn-success" href="{{path('sendDocument',{'id':intership.id})}}">Envoyer un/plusieurs document(s)</a>
 						</td>
 					</tr>
 				{% endfor %}

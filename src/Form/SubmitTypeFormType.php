@@ -13,7 +13,7 @@ class SubmitTypeFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('save', SubmitType::class, ['label' => 'Générer PDF']);
+            ->add('save', SubmitType::class, ['label' => 'Envoyer']);
     }
 
     public function configureOptions(OptionsResolver $resolver)

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Envoi documents
+{% endblock %}
+
+{% block body %}
+	
+
+
+	<div class="btn-toolbar mb-2 mb-md-0">
+    <label for="file">Sélectionner le fichier à envoyer</label>
+		
+        {{form_start(form)}}
+        {{form_row(form.file)}}
+			<button type="submit" id="btnSubmit" class="btn btn-success">
+				Envoyer le fichier pdf</button>
+        {{form_end(form)}}
+</div>{% endblock %}

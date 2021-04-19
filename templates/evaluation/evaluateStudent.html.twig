@@ -1,49 +1,109 @@
 {% extends 'base.html.twig' %}
-
-{% block title %}Evaluation de
-	{{student.lastname}}
-	{{student.firstname}}
-{% endblock %}
-{% block body %}
-	{{form_start(form)}}
+	{% block body %}
+	<br>
 	<div class="container">
+
+
 		<div class="row">
-			<h1>
-				Évaluation de
-				{{student.lastname}}
-				{{student.firstname}}
-			</h1>
+			<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Nom et prénom de l'étudiant :
+						{{evaluation.cotation[0].user.firstName}}
+						{{evaluation.cotation[0].user.lastName}}
+					</label>
+				</h3>
 
+				<br>
+			</div>
 
+			<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Information Stage :<br>
+						Référent : {% for referent in evaluation.cotation[0].intership.referents %}
+						<li>	{{referent.lastname}} {{referent.firstname}} 
+							</li>
+						{% endfor %}<br>
+						Intervalle de stage : {{evaluation.cotation[0].intership.firstday| date('d/m/Y')}} - {{evaluation.cotation[0].intership.lastday| date('d/m/Y')}}
+					</label>
+				</h3>
+				<h3>
+					<label for="exampleFormControlTextarea5">Date de visite :
+						{{evaluation.dateCreation | date('d/m/Y')}}
+					</label>
+				</h3>
+
+				<br>
+			</div>
+
+			<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Sujet d'évaluation :
+						{{evaluation.subject}}
+					</label>
+				</h3>
+				
+
+				<br>
+			</div>
 			<table class="table table-striped">
 				<thead>
-					<td>Numéro de la compétence / sous-compétence</td>
-					<td>Nom de la compétence / sous-compétence</td>
+					<td>Numéro de la compétence</td>
+					<td>Nom de la sous-compétence</td>
 					<td>Cotation</td>
 				</thead>
 
 				<tbody>
+					{% for cotation in evaluation.cotation %}
+						{% set index = 0 %}
+						<tr>
+							{% if index != 0 %}
+								<tr>
+								{% endif %}
+								<td rowspan={{cotation.subskillcotation|length}}>C{{cotation.skill.skillNumber}}
+									:
+									{{cotation.skill.name}}</td>
+								{% for subcotation in cotation.subskillcotation %}
+									{% set index = loop.index %}
+									<td>{{subcotation.subskill.name}}</td>
 
-					<tr>
 
-						<td>{{subskill.skill.skillNumber}}.{{subskill.number}}</td>
-						<td>
-							<i>
-								<u>
-									<b>{{subskill.skill.name}}</b>
-								</u>
-							</i>
-							<br>{{subskill.name}}</td>
-
-						<td>{{form_widget(form.cotation)}}</td>
-					</tr>
+									<td>
+										{% if subcotation.cotation == 1 %}
+											NA--
+										{% else %}
+											{% if subcotation.cotation == 2 %}
+												NA-
+											{% else %}
+												{% if subcotation.cotation == 3 %}
+													A+
+												{% else %}
+													A++
+												{% endif %}
+											{% endif %}
+										{% endif %}
+									</td>
+									{% if index != cotation.subskillcotation|length %}
+									</tr>
+								{% endif %}
+							{% endfor %}
+						</tr>
+						<tr>
+							<td colspan="3">Commentaire :
+								{% if cotation.comments == "" or cotation.comments == null %}
+									Pas de commentaire pour cette compétence.
+								{% endif %}
+								{{cotation.comments}}
+							</td>
+						</tr>
+					{% endfor %}
 				</tbody>
 			</table>
-			{{form_widget(form.comments)}}
-			{{form_row(form.save)}}
-			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':student.id})}}">Revenir à la liste des étudiants</a>
+			<div class="form-group green-border-focus">
+				<label for="exampleFormControlTextarea5">Commentaire Global</label>
+				<textarea class="form-control" name="{{evaluation.id}}" rows="3">{{evaluation.comments}}</textarea>
+				<br>
+			</div>
+
 		</div>
 	</div>
-	{{form_end(form)}}
-
 {% endblock %}

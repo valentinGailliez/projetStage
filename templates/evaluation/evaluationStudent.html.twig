@@ -17,8 +17,8 @@
 			<div class="form-group green-border-focus">
 				<h3>
 					<label for="exampleFormControlTextarea5">Nom et prénom de l'étudiant :
-						{{student.firstName}}
-						{{student.lastName}}
+						{{evaluation.cotation[0].user.firstName}}
+						{{evaluation.cotation[0].user.lastName}}
 					</label>
 				</h3>
 
@@ -28,7 +28,11 @@
 			<div class="form-group green-border-focus">
 				<h3>
 					<label for="exampleFormControlTextarea5">Information Stage :<br>
-						Intervalle de stage : {{intership.firstday| date('d/m/Y')}} - {{intership.lastday| date('d/m/Y')}}
+						Référent : {% for referent in evaluation.cotation[0].intership.referents %}
+						<li>	{{referent.lastname}} {{referent.firstname}} 
+							</li>
+						{% endfor %}<br>
+						Intervalle de stage : {{evaluation.cotation[0].intership.firstday| date('d/m/Y')}} - {{evaluation.cotation[0].intership.lastday| date('d/m/Y')}}
 					</label>
 				</h3>
 				<h3>
@@ -58,7 +62,7 @@
 				</thead>
 
 				<tbody>
-					{% for cotation in cotations %}
+					{% for cotation in evaluation.cotation %}
 						{% set index = 0 %}
 						<tr>
 							{% if index != 0 %}

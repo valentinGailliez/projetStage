@@ -4,9 +4,23 @@
 	<br>
 	<div class="container">
 	<div class="form-group green-border-focus">
+	<div class="form-group green-border-focus">
+				<h3>
+					<label for="exampleFormControlTextarea5">Nom et prénom de l'étudiant :
+						{{evaluation.cotation[0].user.firstName}}
+						{{evaluation.cotation[0].user.lastName}}
+					</label>
+				</h3>
+
+				<br>
+			</div>
 				<h3>
 					<label for="exampleFormControlTextarea5">Information Stage :<br>
-						Intervalle de stage : {{intership.firstday| date('d/m/Y')}} - {{intership.lastday| date('d/m/Y')}}
+					Référent : {% for referent in evaluation.cotation[0].intership.referents %}
+					<li>	{{referent.lastname}} {{referent.firstname}} 
+							</li>
+						{% endfor %}<br>
+						Intervalle de stage : {{evaluation.cotation[0].intership.firstday| date('d/m/Y')}} - {{evaluation.cotation[0].intership.lastday| date('d/m/Y')}}
 					</label>
 				</h3>
 				<h3>
@@ -28,7 +42,7 @@
 				</thead>
 
 				<tbody>
-					{% for cotation in cotations %}
+					{% for cotation in evaluation.cotation %}
 						{% set index = 0 %}
 						<tr>
 							{% if index != 0 %}
@@ -79,6 +93,7 @@
 				<br>
 			</div>
 			{{form_start(form)}}
+			{{form_label(form.save,'Générer PDF')}}
 			{{form_end(form)}}
 			<a class="btn btn-secondary" href="{{path('listEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Revenir à son évaluation</a>
 		</div>
