@@ -126,7 +126,7 @@ else{
                     $this->addFlash("success", "Vous avez créé un stage.");
                     $application = $this->em->getRepository(ApplicationField::class)->findOneBy(["id" => $appli]);
                     $intership->setApplicationField($application);
-                    if($firstday->format('m')<=9){
+                    if($firstday->format('m')<9){
                         $firstansco = $firstday->format('Y')-1;
                         $lastansco = $firstday->format('Y');
                         $ansco = "{$firstansco}-{$lastansco}";

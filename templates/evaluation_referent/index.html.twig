@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste étudiants
+{% endblock %}
+
+{% block body %}
+
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Liste des étudiants</div>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<td>Nom de l'étudiant</td>
+			<td>Prénom de l'étudiant</td>
+			<td>Evaluer</td>
+			<td>Clôturer l'évaluation</td>
+		</thead>
+
+		<tbody>
+			{% for globalEvaluation in listGlobalEvaluation%}
+				<tr>
+					<td>{{globalEvaluation.evaluations[0].cotation[0].user.lastname}}</td>
+					<td>{{globalEvaluation.evaluations[0].cotation[0].user.firstname}}</td>
+					<td>
+						<a class="btn btn-secondary" href="{{path('listEvaluation',{'id' : globalEvaluation.evaluations[0].cotation[0].user.id,'idIntership':globalEvaluation.evaluations[0].cotation[0].intership.id})}}">
+							Evaluer
+						</a>
+					</td>
+					<td>
+						<a class="btn btn-success" href="{{path('endEvaluation',{'id':globalEvaluation.evaluations[0].cotation[0].user.id,'idIntership':globalEvaluation.evaluations[0].cotation[0].intership.id})}}">
+							Clôturer l'évaluation
+						</a>
+					</td>
+				</tr>
+			</tbody>
+		{% endfor %}
+	</table>
+{% endblock %}

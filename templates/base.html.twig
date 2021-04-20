@@ -58,6 +58,11 @@
 									<span data-feather="home"></span>
 									Evaluation (Etudiant)
 								</a>
+								<a class="nav-link active" aria-current="page" href="{{path('viewReferentEvaluation')}}">
+									<span data-feather="home"></span>
+									Evaluation (Référent)
+								</a>
+								
 							</li>
 
 						</ul>
@@ -66,6 +71,7 @@
 							<a class="btn btn-success" href="{{path('endEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
 							{% else %}
 								{% if app.request.get('_route') == "viewStudentEvaluation" %}
+								<a class="btn btn-success"> Envoyer un mail à l'étudiant</a>
 								<a class="btn btn-success" href="{{path('viewCloturedEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Retourner à la page précédente</a>
 								{% endif %}
 								

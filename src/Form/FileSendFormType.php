@@ -15,7 +15,6 @@ class FileSendFormType extends AbstractType
         $builder
             ->add('file',FileType::class,['label' => 'Envoyer un pdf','constraints' => [
                 new File([
-                    'maxSize' => '1024k',
                     'mimeTypes' => [
                         '*.pdf'
                     ],

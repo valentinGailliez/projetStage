@@ -14,9 +14,8 @@
 				<td>Lieu</td>
 				<td>Section / sous-section</td>
 				<td>Bloc</td>
-				<td>Début de stage - Fin de stage</td>
 				<td>Année académique</td>
-				<td>Envoyer un/plusieurs document(s)</td>
+				<td>Consulter les étudiants</td>
 			</thead>
 			<tbody>
 
@@ -29,8 +28,7 @@
 								{{intership.applicationField.parent.name}}</td>
 						{% else %}
 							<td>{{intership.applicationField.parent.parent.parent.parent.parent.name}}</td>
-							<td>{{intership.applicationField.parent.parent.parent.parent.name}}</td>
-
+							
 							<td>{{intership.applicationField.parent.parent.parent.name}}</td>
 							<td>{{intership.applicationField.parent.parent.name}}
 								/
@@ -38,12 +36,9 @@
 
 						{% endif %}
 						<td>{{intership.applicationField.name}}</td>
-						<td>{{intership.firstDay | date("d/m/Y")}}
-							-
-							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
 						<td>
-							<a class="btn btn-success" href="{{path('sendDocument',{'id':intership.id})}}">Evaluer l'étudiant</a>
+							<a class="btn btn-success" href="{{path('viewReferentStudentEvaluation',{'id':intership.id})}}">Consulter la liste des étudiants</a>
 						</td>
 					</tr>
 				{% endfor %}
