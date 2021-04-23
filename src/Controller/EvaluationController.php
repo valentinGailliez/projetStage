@@ -140,17 +140,27 @@ class EvaluationController extends AbstractController
      */
     public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
     {
-        
-
-
+        //Création d'un formulaire
         $form = $this->createForm(SubmitTypeFormType::class);
         $form->handleRequest($request);
+
+        //Recherche des cotations en fonction du stage et de l'étudiant
         $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId(), 'intership' => $intership->getId()]);
+
+        /**
+         *  Vérifier si il existe des cotations
+         *  Si il n'existe pas de cotations, l'utilisateur sera renvoyé sur une autre page
+        */
         if ($cotations == null) {
             $this->addFlash('danger', "Aucune évaluation n'est créée");
-
             return $this->redirectToRoute('viewEvaluation', ['id' => $intership->getId()]);
         }
+
+        /**
+         * Nous allons vérifier si toutes les cotations sont correctes
+         * CAD vérifier si toutes les sous-compétences ont une côte
+         * Les côtes définies sont NA--,NA-, A+ et A++
+         */
         $nbCotationError = 0;
         foreach ($cotations as $cotation) {
             foreach ($cotation->getsubSkillcotation() as $subcotation) {
@@ -159,18 +169,26 @@ class EvaluationController extends AbstractController
                 }
             }
         }
+
+        /**
+         * Si il y a des erreurs, l'utilisateur sera redirigé vers la page d'évaluation de l'étudiant
+         */
         if ($nbCotationError != 0) {
             $this->addFlash('danger',  $nbCotationError . " sous-compétence(s) n'est/ne sont pas évaluée(s)");
             return $this->redirectToRoute('listEvaluation', ['id' => $student->getId(), 'idIntership' => $intership->getId()]);
         }
 
+        /**
+         * Recherche les évaluations dans la Base de données
+         */
         $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
-
         foreach ($evaluations as $evaluation) {
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
                 if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
-
                     if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
+                        /**
+                         * Lorsque le formulaire est validé
+                         */
                         if ($form->isSubmitted()) {
                             $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
                                 'evaluation' => $evaluation
@@ -180,8 +198,10 @@ class EvaluationController extends AbstractController
                             $snappy->setOption('footer-line', true);
                             $snappy->setOption('footer-center','Page [page] of [topage]');
                             $evaluation->setState("Fini");
-                           
                             $listGlobalEvaluation = $this->em->getRepository(GlobalEvaluation::class)->findAll();
+                            /**
+                             * Nous allons placer l'évaluation dans une liste d'évaluation qu'on nommera Evaluation-Globale
+                             */
                             if($listGlobalEvaluation == null){
                                 $globalEvaluation = new GlobalEvaluation();
                                 $globalEvaluation->setCreatedDate(new DateTime());
@@ -236,12 +256,10 @@ class EvaluationController extends AbstractController
                         ]);
                     }
                     $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
-                    return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);
-                    
+                    return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);  
                 }
             }
         }
-     
     }
 
     /**
@@ -413,27 +431,14 @@ class EvaluationController extends AbstractController
             $email = (new TemplatedEmail())
             ->from('no-reply@helha.be')
             ->to($referent->getMail())
-            ->subject('Test d\'envoi de mail')
+            ->subject('Evaluation de '.$evaluation->getCotation()[0]->getUser()->getLastName().' '.$evaluation->getCotation()[0]->getUser()->getFirstName().'')
             ->htmlTemplate('evaluation/evaluationStudent.html.twig')
-            ->context(['student' => $evaluation->getCotation()[0]->getUser(),
-            'cotations' => $evaluation->getCotation(),
-            'evaluation' => $evaluation,
-            'intership'=>$evaluation->getCotation()[0]->getIntership()
+            ->context([
+            'evaluation' => $evaluation
             ]);
 
             $this->mailer->send($email);
         }
 
-    }
-
-    function orderByDate($a, $b) {
-        //retourner 0 en cas d'égalité
-        if ($a->getSkillNumber() == $b->getSkillNumber()) {
-            return 0;
-        } else if ($a->getSkillNumber() < $b->getSkillNumber()) {//retourner -1 en cas d’infériorité
-            return -1;
-        } else {//retourner 1 en cas de supériorité
-            return 1;
-        }
     }
 }

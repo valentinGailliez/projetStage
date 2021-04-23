@@ -41,6 +41,7 @@ class SkillController extends AbstractController
     {
         $skill = new Skill();
         $domains = $this->em->getRepository(ApplicationField::class)->findBy(["type" => "category"]);
+        //creation de formulaire
         $form = $this->createForm(SkillFormType::class, $skill);
 
 
