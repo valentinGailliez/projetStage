@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Auto-Évaluation
+{% endblock %}
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<h1>
+				<u>
+					Auto-Évaluation
+				</u>
+			</h1>
+<input type='text' id="textSubject" name="{{evaluation.id}}" placeholder="Sujet d'observation" value="{{evaluation.subject}}"/>
+Date de la visite :
+<input type='date' id="date" name="{{evaluation.id}}" value="{{evaluation.dateCreation | date('Y-m-d')}}"/>			
+
+			{% for cotation in evaluation.cotation%}
+				{% set indexSkill = loop.index0 %}
+
+				<h2>
+					Compétence :
+					{{cotation.skill.name}}
+				</h2>
+
+
+				<table class="table table-striped">
+					<thead>
+						<td>Numéro de la compétence / sous-compétence</td>
+						<td>Nom de la compétence / sous-compétence</td>
+						<td>Cotation</td>
+					</thead>
+
+					<tbody>
+						{% for subcotation in cotation.subskillcotation %}
+							<tr>
+
+								<td>{{cotation.skill.skillNumber}}.{{subcotation.subskill.number}}</td>
+								<td>
+									{{subcotation.subskill.name}}</td>
+
+								<td>
+									<select class="form-select form-select-lg mb-3" id="{{subcotation.id}}" aria-label="form-select-lg example">
+
+										<option {% if subcotation.cotation == 0 %} selected="selected" {% endif %} disabled value="0">Évaluer la compétence</option>
+										<option {% if subcotation.cotation == 1 %} selected="selected" {% endif %} value="1">NA--</option>
+										<option {% if subcotation.cotation == 2 %} selected="selected" {% endif %} value="2">NA-</option>
+										<option {% if subcotation.cotation == 3 %} selected="selected" {% endif %} value="3">A+</option>
+										<option {% if subcotation.cotation == 4 %} selected="selected" {% endif %} value="4">A++</option>
+									</select>
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<br>
+				<div class="form-group green-border-focus">
+					<label for="exampleFormControlTextarea5">Commentaire sur la compétence :
+						{{cotation.skill.name}}</label>
+					<textarea class="form-control" name="skillComments"id="{{cotation.id}}" rows="3">{{cotation.comments}}</textarea>
+					<br>
+				</div>
+				<hr style="height:4px;border-width:0;color:blue;background-color:red">
+				<br>
+
+			{% endfor %}
+						<div class="form-group green-border-focus">
+				<label for="exampleFormControlTextarea5">Commentaire Global</label>
+				<textarea class="form-control" id="{{evaluation.id}}" name="globalComments"rows="3">{{evaluation.comments}}</textarea>
+				<br>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}<script>
+
+		$(document).ready(function () { // When you change your cotation
+$("select").each(function () {
+$(this).change(function () {
+var subcotation = $(this).attr('id')
+var cotation = $(this).children("option:selected").val()
+$.ajax({
+url: "/evaluation",
+type: 'get',
+data: {
+'subSkillCotation': subcotation,
+'cotation': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+
+})
+})
+
+// When you change your comments.
+
+$("textarea").each(function () {
+$(this).change(function () {
+	var cotation = $(this).attr('id')
+var comments = $(this).val()
+if($(this).attr('name')=="skillComments"){
+
+$.ajax({
+url: "/evaluationComments",
+type: 'get',
+data: {
+'comments': comments,
+'cotation': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+}
+else{
+console.log(comments)
+$.ajax({
+url: "/evaluationArchiveComments",
+type: 'get',
+data: {
+'comments': comments,
+'evaluation': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+}
+})
+})
+
+// when you change the subject
+$("#textSubject").change(function () {
+var evaluation = $(this).attr('name')
+var value = $(this).val()
+$.ajax({
+url: "/evaluationArchiveSubject",
+type: 'get',
+data: {
+'subject': value,
+'evaluation': evaluation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+$("#date").change(function () {
+var evaluation = $(this).attr('name')
+var value = $(this).val()
+	$.ajax({
+url: "/evaluationArchiveDate",
+type: 'get',
+data: {
+'date': value,
+'evaluation': evaluation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+})
+	</script>
+{% endblock %}

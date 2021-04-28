@@ -17,6 +17,7 @@
 				<td>Début de stage - Fin de stage</td>
 				<td>Année académique</td>
 				<td>Envoyer un/plusieurs document(s)</td>
+				<td>S'auto-évaluer</td>
 			</thead>
 			<tbody>
 
@@ -43,11 +44,13 @@
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
 						<td>
-							<a class="btn btn-success" href="{{path('sendDocument',{'id':intership.id})}}">Evaluer l'étudiant</a>
+							<a class="btn btn-success" href="{{path('sendDocument',{'id':intership.id})}}">Partager des documents</a>
+						</td>
+						<td>
+						<a class="btn btn-success" href="{{path('autoEvaluation',{'id':intership.id})}}">S'auto-évaluer</a>
 						</td>
 					</tr>
 				{% endfor %}
 			</tbody>
-		</tbody>
 	</table>
 </div>{% endblock %}

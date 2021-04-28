@@ -1,0 +1,8 @@
+{% block body %}
+Bonjour {{evaluation.cotation[0].user.firstName}}
+						{{evaluation.cotation[0].user.lastName}}.
+Veuillez retrouver ci-dessous un lien pour consulter votre évaluation sur base d'une rencontre effectué le {{evaluation.dateCreation | date('d/m/Y')}}.
+	<br>
+127.0.0.1:8000/evaluation/consultation/{{evaluation.id}}
+<a href="{{path('ConsultationEvaluation',{'id':evaluation.id})}}">Consulter votre évaluation</a>
+{% endblock %}

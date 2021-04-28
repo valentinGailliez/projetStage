@@ -17,6 +17,8 @@
 <input type='text' id="textSubject" name="{{evaluation.id}}" placeholder="Sujet d'observation" value="{{evaluation.subject}}"/>
 Date de la visite :
 <input type='date' id="date" name="{{evaluation.id}}" value="{{evaluation.dateCreation | date('Y-m-d')}}"/>			
+<label for="exampleFormControlTextarea5">Bloc note (Optionnel)</label>
+				<textarea class="form-control" id="{{evaluation.id}}" name="note"rows="3">{{evaluation.note}}</textarea>
 
 			{% for cotation in evaluation.cotation%}
 				{% set indexSkill = loop.index0 %}
@@ -108,33 +110,49 @@ $(this).change(function () {
 var comments = $(this).val()
 if($(this).attr('name')=="skillComments"){
 
-$.ajax({
-url: "/evaluationComments",
-type: 'get',
-data: {
-'comments': comments,
-'cotation': cotation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
+	$.ajax({
+		url: "/evaluationComments",
+		type: 'get',
+		data: {
+			'comments': comments,
+			'cotation': cotation
+		},
+		cache: false,
+		datatype: 'json',
+		success: function (data, status) {},
+		error: function () {}
+	});
 }
 else{
-console.log(comments)
-$.ajax({
-url: "/evaluationArchiveComments",
-type: 'get',
-data: {
-'comments': comments,
-'evaluation': cotation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
+	if($(this).attr('name')=="globalComments"){
+
+		$.ajax({
+			url: "/evaluationArchiveComments",
+			type: 'get',
+			data: {	
+				'comments': comments,
+				'evaluation': cotation
+			},
+			cache: false,
+			datatype: 'json',
+			success: function (data, status) {},
+			error: function () {}
+		});
+	}
+	else{
+		$.ajax({
+			url: "/evaluationNote",
+			type: 'get',
+			data: {
+				'comments': comments,
+				'evaluation': cotation
+			},
+			cache: false,
+			datatype: 'json',
+			success: function (data, status) {},
+			error: function () {}
+		});
+	}
 }
 })
 })

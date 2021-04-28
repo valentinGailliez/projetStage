@@ -49,6 +49,21 @@ class Evaluation
      */
     private $subject;
 
+    /**
+     * @ORM\Column(type="string", length=20)
+     */
+    private $typeEvaluation;
+
+    /**
+     * @ORM\Column(type="string", length=40, nullable=true)
+     */
+    private $position;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $note;
+
     public function __construct()
     {
         $this->cotation = new ArrayCollection();
@@ -145,6 +160,42 @@ class Evaluation
     public function setSubject(string $subject): self
     {
         $this->subject = $subject;
+
+        return $this;
+    }
+
+    public function getTypeEvaluation(): ?string
+    {
+        return $this->typeEvaluation;
+    }
+
+    public function setTypeEvaluation(string $typeEvaluation): self
+    {
+        $this->typeEvaluation = $typeEvaluation;
+
+        return $this;
+    }
+
+    public function getPosition(): ?string
+    {
+        return $this->position;
+    }
+
+    public function setPosition(?string $position): self
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): self
+    {
+        $this->note = $note;
 
         return $this;
     }

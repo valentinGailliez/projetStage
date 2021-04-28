@@ -23,6 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class EvaluationController extends AbstractController
 {
@@ -82,7 +83,7 @@ class EvaluationController extends AbstractController
     {
         $cotations = [];
         $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership, 'user' => $student]);
-        $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Evaluation']);
         $evaluationArchive = new Evaluation();
         foreach($evaluations as $evaluation){
             if(count($cotations) >=1){
@@ -100,12 +101,10 @@ class EvaluationController extends AbstractController
             foreach ($listSkill as $skill) {
                 if (sizeof($skill->getSubSkills()) == 0) {
                     array_splice($listSkill, array_search($skill, $listSkill), 1);
-                } else {
-                       $listSubSkill =  $this->em->getRepository(SubSkill::class)->findBy(['skill' => $skill->getId()], ['number' => 'ASC']);
-                   
                 }
             }
             $evaluationArchive->setState("Modification");
+            $evaluationArchive->setTypeEvaluation("Evaluation");
             foreach ($listSkill as $skill) {
                 $cotation = new Cotation();
                 $cotation->setUser($student);
@@ -185,78 +184,84 @@ class EvaluationController extends AbstractController
         foreach ($evaluations as $evaluation) {
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
                 if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
-                    if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
-                        /**
-                         * Lorsque le formulaire est validé
-                         */
-                        if ($form->isSubmitted()) {
-                            $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
-                                'evaluation' => $evaluation
-                            ]);
-                            $snappy->setOption('header-left',"Encodé par Mr/Mme Enseignant Enseignant");
-                            $snappy->setOption('header-line', true);
-                            $snappy->setOption('footer-line', true);
-                            $snappy->setOption('footer-center','Page [page] of [topage]');
-                            $evaluation->setState("Fini");
-                            $listGlobalEvaluation = $this->em->getRepository(GlobalEvaluation::class)->findAll();
+                    if($evaluation->getPosition != ''){
+                        if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
                             /**
-                             * Nous allons placer l'évaluation dans une liste d'évaluation qu'on nommera Evaluation-Globale
+                             * Lorsque le formulaire est validé
                              */
-                            if($listGlobalEvaluation == null){
-                                $globalEvaluation = new GlobalEvaluation();
-                                $globalEvaluation->setCreatedDate(new DateTime());
-                                $this->em->persist($globalEvaluation);
-                                $globalEvaluation->addEvaluation($evaluation);
-                            }
-                            else{
-                                if(sizeof($listGlobalEvaluation)==1){
-                                    if($listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() == $evaluation->getCotation()[0]->getIntership()->getAnsco()
-                                        && $listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getUser() == $evaluation->getCotation()[0]->getUser()
-                                    ){
-                                        $listGlobalEvaluation->addEvaluation($evaluation);
-                                    }
-                                    else{
-                                        $globalEvaluation = new GlobalEvaluation();
-                                        
-                                $globalEvaluation->setCreatedDate(new DateTime());
-                                        $this->em->persist($globalEvaluation);
-                                        $globalEvaluation->addEvaluation($evaluation);
-                                    }
+                            if ($form->isSubmitted()) {
+                                $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
+                                    'evaluation' => $evaluation
+                                ]);
+                                $snappy->setOption('header-left',"Encodé par Mr/Mme Enseignant Enseignant");
+                                $snappy->setOption('header-line', true);
+                                $snappy->setOption('footer-line', true);
+                                $snappy->setOption('footer-center','Page [page] of [topage]');
+                                $evaluation->setState("Fini");
+                                $listGlobalEvaluation = $this->em->getRepository(GlobalEvaluation::class)->findAll();
+                                /**
+                                 * Nous allons placer l'évaluation dans une liste d'évaluation qu'on nommera Evaluation-Globale
+                                 */
+                                if($listGlobalEvaluation == null){
+                                    $globalEvaluation = new GlobalEvaluation();
+                                    $globalEvaluation->setCreatedDate(new DateTime());
+                                    $this->em->persist($globalEvaluation);
+                                    $globalEvaluation->addEvaluation($evaluation);
                                 }
                                 else{
-                                    $count = 0;
-                                    foreach($listGlobalEvaluation as $globalEvaluation){
-                                        if($globalEvaluation->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() == $evaluation->getCotation()[0]->getIntership()->getAnsco()
-                                            && $globalEvaluation->getEvaluations()[0]->getCotation()[0]->getUser() == $evaluation->getCotation()[0]->getUser()
+                                    if(sizeof($listGlobalEvaluation)==1){
+                                        if($listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() == $evaluation->getCotation()[0]->getIntership()->getAnsco()
+                                            && $listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getUser() == $evaluation->getCotation()[0]->getUser()
                                         ){
-                                            $count++;
+                                            $listGlobalEvaluation->addEvaluation($evaluation);
+                                        }
+                                        else{
+                                            $globalEvaluation = new GlobalEvaluation();
+                                            
+                                    $globalEvaluation->setCreatedDate(new DateTime());
+                                            $this->em->persist($globalEvaluation);
                                             $globalEvaluation->addEvaluation($evaluation);
                                         }
                                     }
-                                    if($count == 0){
-                                        $globalEvaluation = new GlobalEvaluation();
-                                        
-                                $globalEvaluation->setCreatedDate(new DateTime());
-                                        $this->em->persist($globalEvaluation);
-                                        $globalEvaluation->addEvaluation($evaluation);
+                                    else{
+                                        $count = 0;
+                                        foreach($listGlobalEvaluation as $globalEvaluation){
+                                            if($globalEvaluation->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() == $evaluation->getCotation()[0]->getIntership()->getAnsco()
+                                                && $globalEvaluation->getEvaluations()[0]->getCotation()[0]->getUser() == $evaluation->getCotation()[0]->getUser()
+                                            ){
+                                                $count++;
+                                                $globalEvaluation->addEvaluation($evaluation);
+                                            }
+                                        }
+                                        if($count == 0){
+                                            $globalEvaluation = new GlobalEvaluation();
+                                            
+                                    $globalEvaluation->setCreatedDate(new DateTime());
+                                            $this->em->persist($globalEvaluation);
+                                            $globalEvaluation->addEvaluation($evaluation);
+                                        }
                                     }
                                 }
-                            }
 
-                            $this->em->flush();
-                            $this->notify($evaluation);
-                            return new PdfResponse(
-                                $snappy->getOutputFromHtml($html),
-                                'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
-                            );
+                                $this->em->flush();
+                                $this->notify($evaluation);
+                                return new PdfResponse(
+                                    $snappy->getOutputFromHtml($html),
+                                    'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
+                                );
+                            }
+                            return $this->render('evaluation/generatePDF.html.twig', [
+                                'evaluation' => $evaluation,
+                                'form' => $form->createView()
+                            ]);
                         }
-                        return $this->render('evaluation/generatePDF.html.twig', [
-                            'evaluation' => $evaluation,
-                            'form' => $form->createView()
-                        ]);
+                        $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
+                        return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]); 
                     }
-                    $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
-                    return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);  
+                    else{
+                        $this->addFlash('danger','Aucune position détaillée pour l\'évaluation');
+                        return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);
+                    } 
                 }
             }
         }
@@ -278,6 +283,24 @@ class EvaluationController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/evaluation/email/student/{id}",name="sendMailToStudent")
+     */
+    public function sendMailToStudent(Evaluation $evaluation){
+        $email = (new TemplatedEmail())
+            ->from('no-reply@helha.be')
+            ->to($evaluation->getCotation()[0]->getUser()->getMail())
+            ->subject('Evaluation de '.$evaluation->getCotation()[0]->getUser()->getLastName().' '.$evaluation->getCotation()[0]->getUser()->getFirstName().'')
+            ->htmlTemplate('evaluation/mailStudent.html.twig')
+            ->context([
+            'evaluation' => $evaluation
+            ]);
+
+            $this->mailer->send($email);
+        
+        return $this->redirectToRoute('viewStudentEvaluation',['id'=>$evaluation->getId()]);
+    }
+
 
     /**
      * @Route("/evaluation/{id}",name="viewStudentEvaluation")
@@ -292,6 +315,7 @@ class EvaluationController extends AbstractController
      * @Route("/evaluation/etudiant/intership",name="studentEvaluationIntership")
      */
     public function listEvaluationStudent():Response{
+
         $listIntership = $this->em->getRepository(Intership::class)->findAll();
         return $this->render('evaluation_student/listIntership.html.twig', [
             'interships' => $listIntership
@@ -299,6 +323,60 @@ class EvaluationController extends AbstractController
     }
 
 
+    /**
+     * @Route("/autoevaluation/{id}",name="autoEvaluation")
+     *  
+     */
+    public function AutoEvaluation(Intership $intership){
+        $cotations = [];
+        $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership]);
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Auto-Evaluation']);
+        $evaluationArchive = new Evaluation();
+        foreach($evaluations as $evaluation){
+            if(count($cotations) >=1){
+            if($evaluation == $cotations[0]->getEvaluation() && $evaluation->getTypeEvaluation()=='Auto-Evaluation'){
+             
+                return $this->render('evaluation_student/evaluation.html.twig', [
+                    'evaluation'=>$evaluation
+                ]);
+            }
+        }
+        }
+            $listSkill = $intership->getSkills();
+            
+            foreach ($listSkill as $skill) {
+                if (sizeof($skill->getSubSkills()) == 0) {
+                    array_splice($listSkill, array_search($skill, $listSkill), 1);
+                } 
+            }
+            $cotations=[];
+            $evaluationArchive->setState("Modification");
+            $evaluationArchive->setTypeEvaluation("Auto-Evaluation");
+            foreach ($listSkill as $skill) {
+                $cotation = new Cotation();
+                $cotation->setUser(null);
+                $cotation->setSkill($skill);
+                $cotation->setIntership($intership);
+                foreach ($skill->getSubSkills() as $subskill) {
+                    $subCotation = new SubSkillCotation();
+                    $subCotation->setSubSkill($subskill);
+                    $subCotation->setCotation(0);
+                    $cotation->addSubskillcotation($subCotation);
+                }
+                array_push($cotations,$cotation);
+                $this->em->persist($cotation);
+                $this->em->flush();
+            }
+            foreach ($cotations as $cotation) {
+               $evaluationArchive->addCotation($cotation);
+            }
+    
+            $this->em->persist($evaluationArchive);
+            $this->em->flush();
+        return $this->render('evaluation_student/evaluation.html.twig', [
+             'evaluation'=>$evaluationArchive
+        ]);
+    }
     /**
      * @Route("/evaluation/etudiant/{id}",name="sendDocument")
      */
@@ -313,6 +391,15 @@ class EvaluationController extends AbstractController
             'intership'=>$intership,
             'form'=>$form->createView()
         ]);
+    }
+
+    /**
+     * @Route("/evaluation/consultation/{id}",name="ConsultationEvaluation")
+     */
+    public function consultationEvaluation(Evaluation $evaluation){
+        return $this->render('evaluation/evaluateStudent.html.twig', [
+            'evaluation'=>$evaluation
+       ]);
     }
 
     /**
@@ -347,7 +434,6 @@ class EvaluationController extends AbstractController
      */
     public function listReferentStudent(Intership $intership): Response
     {
-        $students = [];
         $listGlobalEvaluations = $this->em->getRepository(GlobalEvaluation::class)->findAll();
         if(sizeof($listGlobalEvaluations)==1){
             if($listGlobalEvaluations[0]->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() != $intership->getAnsco()){
@@ -380,6 +466,26 @@ class EvaluationController extends AbstractController
         $this->em->flush();
         return new Response("test");
     }
+
+    /**
+     * @Route("position",name="setPosition")
+     */
+    public function setPosition(Request $request){
+        $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id'=>$request->get('evaluation')]);
+        $evaluation->setPosition($request->get('position'));
+        $this->em->flush();
+        return new Response("test");
+    }
+    /**
+     * @Route("evaluationNote",name="setNote")
+     */
+    public function setNote(Request $request){
+        $evaluation = $this->em->getRepository(Evaluation::class)->findOneBy(['id' => $request->get('evaluation')]);
+        $evaluation->setNote($request->get('comments'));
+        $this->em->flush();
+        return new Response("test");
+    }
+
 
     /**
      * @Route("evaluationComments",name="evaluationComments")
