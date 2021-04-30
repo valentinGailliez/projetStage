@@ -6,13 +6,17 @@ security:
             # This value auto-selects the best possible hashing algorithm
             # (i.e. Sodium when available).
             algorithm: auto
+       App\Entity\Users:
+          algorithm: auto
+
     
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
-                class: App\Entity\Security
+                class: App\Entity\Users
                 property: email
+        # used to reload user from session & other features (e.g. switch_user)
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -25,6 +29,11 @@ security:
             # configure the maximum login attempts (per minute)
             login_throttling:
                 limiter: app.login_rate_limiter
+            custom_authenticator: App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                # target: app_any_route
         
             
 

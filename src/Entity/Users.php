@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\SecurityRepository;
+use App\Repository\UsersRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity(repositoryClass=SecurityRepository::class)
+ * @ORM\Entity(repositoryClass=UsersRepository::class)
  */
-class Security implements UserInterface
+class Users implements UserInterface
 {
     /**
      * @ORM\Id
@@ -27,6 +27,8 @@ class Security implements UserInterface
      * @ORM\Column(type="json")
      */
     private $roles = [];
+
+    
 
     public function getId(): ?int
     {
@@ -77,9 +79,16 @@ class Security implements UserInterface
     /**
      * @see UserInterface
      */
-    public function getPassword()
+    public function getPassword(): string
     {
-        // not needed for apps that do not check user passwords
+        return (string) $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     /**
@@ -87,7 +96,7 @@ class Security implements UserInterface
      */
     public function getSalt()
     {
-        // not needed for apps that do not check user passwords
+        // not needed when using the "bcrypt" algorithm in security.yaml
     }
 
     /**
