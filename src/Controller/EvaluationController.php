@@ -38,6 +38,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/intership",name="viewEvaluationIntership")
+     * @IsGranted("ROLE_TEACHER")
      */
     public function getListIntership(): Response
     {

@@ -74,19 +74,26 @@ error: function () {}
 									<span data-feather="home"></span>
 									Stages
 								</a>
+								{% if is_granted('ROLE_TEACHER') %}
+								
 								<a class="nav-link active" aria-current="page" href="{{path('viewEvaluationIntership')}}">
 									<span data-feather="home"></span>
 									Evaluation (Enseignant-Visiteur)
 								</a>
+								{% endif %}
+								
+								{% if is_granted('ROLE_STUDENT') %}
 								<a class="nav-link active" aria-current="page" href="{{path('studentEvaluationIntership')}}">
 									<span data-feather="home"></span>
 									Evaluation (Etudiant)
 								</a>
+								{% endif %}
+								{% if is_granted('ROLE_REFERENT') %}
 								<a class="nav-link active" aria-current="page" href="{{path('viewReferentEvaluation')}}">
 									<span data-feather="home"></span>
 									Evaluation (Référent)
 								</a>
-								
+								{% endif %}
 							</li>
 
 						</ul>

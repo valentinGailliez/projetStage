@@ -198,7 +198,20 @@ class User implements UserInterface
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
+        switch($this->getType()){
+            case 'Etudiant':
+                $roles[]='ROLE_STUDENT';
+                break;
+            case 'Référent':
+                $roles[]='ROLE_REFERENT';
+                break;
+            case 'Enseignant':
+                $roles[]='ROLE_TEACHER';
+                break;
+            case 'Administrateur':
+                $roles[]='ROLE_ADMIN';
+                break;
+        }
         return array_unique($roles);
     }
 

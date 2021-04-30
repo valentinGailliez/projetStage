@@ -6,7 +6,7 @@ security:
             # This value auto-selects the best possible hashing algorithm
             # (i.e. Sodium when available).
             algorithm: auto
-       App\Entity\Users:
+       App\Entity\User:
           algorithm: auto
 
     
@@ -14,7 +14,7 @@ security:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
-                class: App\Entity\Users
+                class: App\Entity\User
                 property: email
         # used to reload user from session & other features (e.g. switch_user)
     firewalls:
@@ -43,8 +43,11 @@ security:
         ROLE_STUDENT : ROLE_USER
         ROLE_TEACHER : ROLE_USER
         ROLE_REFERENT : ROLE_TEACHER
-        ROLE_ADMIN : ROLE_USER
-        
+        ROLE_ADMIN : [ROLE_STUDENT, ROLE_REFERENT, ROLE_ALLOW_TO_SWITCH]
+    
+    access_control:
+       -  { path: '^/evaluation/student', roles: ROLE_STUDENT }
+    
 services:
     app.login_rate_limiter:
         class: Symfony\Component\Security\Http\RateLimiter\DefaultLoginRateLimiter
