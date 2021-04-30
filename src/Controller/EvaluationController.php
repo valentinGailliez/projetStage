@@ -17,22 +17,24 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Annotation\Route;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class EvaluationController extends AbstractController
 {
 
-    private $em,$mailer;
-    public function __construct(EntityManagerInterface $entityManager,MailerInterface $mailer)
+    private $em,$mailer,$security;
+    public function __construct(EntityManagerInterface $entityManager,MailerInterface $mailer, Security $security)
     {
         $this->em = $entityManager;
         $this->mailer=$mailer;
+        $this->security = $security;
     }
 
 
@@ -56,17 +58,9 @@ class EvaluationController extends AbstractController
         $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
 
         foreach ($intership->getApplicationField()->getUsers() as $student) {
-            $added = 0;
-            foreach ($evaluations as $evaluation) {
-                foreach ($evaluation->getCotation() as $cotation) {
-                    if ($student == $cotation->getUser() && $cotation->getIntership() == $intership && $evaluation->getState() == "Fini") {
-                        $added = 1;
-                    }
-                }
-            }
-            if ($added == 0) {
+            
                 array_push($students, $student);
-            }
+            
         }
         return $this->render('evaluation/index.html.twig', [
 
@@ -82,21 +76,18 @@ class EvaluationController extends AbstractController
      */
     public function listSkills(User $student, Intership $intership, Request $request): Response
     {
-        $cotations = [];
-        $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership, 'user' => $student]);
-        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Evaluation']);
+       
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Evaluation','user'=>$this->security->getUser()->getId(),'state'=>'Modification']);
         $evaluationArchive = new Evaluation();
         foreach($evaluations as $evaluation){
-            if(count($cotations) >=1){
-            if($evaluation == $cotations[0]->getEvaluation()){
+            if($evaluation->getCotation()[0]->getUser() == $student && $evaluation->getCotation()[0]->getIntership() == $intership ){
                 
                 return $this->render('evaluation/createEvaluation.html.twig', [
                     'evaluation'=>$evaluation
                 ]);
-            }
         }
         }
-        if ($cotations == null) {
+        $cotations = [];
             $listSkill = $intership->getSkills();
             
             foreach ($listSkill as $skill) {
@@ -106,6 +97,7 @@ class EvaluationController extends AbstractController
             }
             $evaluationArchive->setState("Modification");
             $evaluationArchive->setTypeEvaluation("Evaluation");
+            $evaluationArchive->setUser($this->security->getUser());
             foreach ($listSkill as $skill) {
                 $cotation = new Cotation();
                 $cotation->setUser($student);
@@ -128,7 +120,7 @@ class EvaluationController extends AbstractController
     
             $this->em->persist($evaluationArchive);
             $this->em->flush();
-        }
+        
         return $this->render('evaluation/createEvaluation.html.twig', [
              'evaluation'=>$evaluationArchive
         ]);
@@ -185,7 +177,7 @@ class EvaluationController extends AbstractController
         foreach ($evaluations as $evaluation) {
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
                 if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
-                    if($evaluation->getPosition != ''){
+                    if($evaluation->getPosition() != ''){
                         if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
                             /**
                              * Lorsque le formulaire est validé
@@ -194,7 +186,7 @@ class EvaluationController extends AbstractController
                                 $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
                                     'evaluation' => $evaluation
                                 ]);
-                                $snappy->setOption('header-left',"Encodé par Mr/Mme Enseignant Enseignant");
+                                $snappy->setOption('header-left',"Encodé par Mr/Mme ".$this->security->getUser()->getFirstName().' '.$this->security->getUser()->getLastName());
                                 $snappy->setOption('header-line', true);
                                 $snappy->setOption('footer-line', true);
                                 $snappy->setOption('footer-center','Page [page] of [topage]');
@@ -214,7 +206,7 @@ class EvaluationController extends AbstractController
                                         if($listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getIntership()->getAnsco() == $evaluation->getCotation()[0]->getIntership()->getAnsco()
                                             && $listGlobalEvaluation[0]->getEvaluations()[0]->getCotation()[0]->getUser() == $evaluation->getCotation()[0]->getUser()
                                         ){
-                                            $listGlobalEvaluation->addEvaluation($evaluation);
+                                            $listGlobalEvaluation[0]->addEvaluation($evaluation);
                                         }
                                         else{
                                             $globalEvaluation = new GlobalEvaluation();
@@ -329,33 +321,30 @@ class EvaluationController extends AbstractController
      *  
      */
     public function AutoEvaluation(Intership $intership){
-        $cotations = [];
-        $cotations = $this->em->getRepository(Cotation::class)->findBy(['intership' => $intership]);
-        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Auto-Evaluation']);
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Auto-Evaluation','user'=>$this->security->getUser()->getId(),'state'=>'Modification']);
         $evaluationArchive = new Evaluation();
         foreach($evaluations as $evaluation){
-            if(count($cotations) >=1){
-            if($evaluation == $cotations[0]->getEvaluation() && $evaluation->getTypeEvaluation()=='Auto-Evaluation'){
-             
-                return $this->render('evaluation_student/evaluation.html.twig', [
+            if($evaluation->getCotation()[0]->getUser() == $this->security->getUser() && $evaluation->getCotation()[0]->getIntership() == $intership ){
+                
+                return $this->render('evaluation/createEvaluation.html.twig', [
                     'evaluation'=>$evaluation
                 ]);
-            }
         }
         }
+        $cotations = [];
             $listSkill = $intership->getSkills();
             
             foreach ($listSkill as $skill) {
                 if (sizeof($skill->getSubSkills()) == 0) {
                     array_splice($listSkill, array_search($skill, $listSkill), 1);
-                } 
+                }
             }
-            $cotations=[];
             $evaluationArchive->setState("Modification");
             $evaluationArchive->setTypeEvaluation("Auto-Evaluation");
+            $evaluationArchive->setUser($this->security->getUser());
             foreach ($listSkill as $skill) {
                 $cotation = new Cotation();
-                $cotation->setUser(null);
+                $cotation->setUser($this->security->getUser());
                 $cotation->setSkill($skill);
                 $cotation->setIntership($intership);
                 foreach ($skill->getSubSkills() as $subskill) {
@@ -367,6 +356,7 @@ class EvaluationController extends AbstractController
                 array_push($cotations,$cotation);
                 $this->em->persist($cotation);
                 $this->em->flush();
+                
             }
             foreach ($cotations as $cotation) {
                $evaluationArchive->addCotation($cotation);
@@ -374,6 +364,7 @@ class EvaluationController extends AbstractController
     
             $this->em->persist($evaluationArchive);
             $this->em->flush();
+        
         return $this->render('evaluation_student/evaluation.html.twig', [
              'evaluation'=>$evaluationArchive
         ]);
@@ -402,6 +393,100 @@ class EvaluationController extends AbstractController
             'evaluation'=>$evaluation
        ]);
     }
+
+/**
+     * @Route("/evaluation/student/cloture/{id}",name="endAutoEvaluation")
+     */
+    public function endAutoEvaluation(Intership $intership, Request $request, Snappy $snappy)
+    {
+        //Création d'un formulaire
+        $form = $this->createForm(SubmitTypeFormType::class);
+        $form->handleRequest($request);
+
+        //Recherche des cotations en fonction du stage et de l'étudiant
+        $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $this->security->getUser()->getId(), 'intership' => $intership->getId()]);
+
+        /**
+         *  Vérifier si il existe des cotations
+         *  Si il n'existe pas de cotations, l'utilisateur sera renvoyé sur une autre page
+        */
+        if ($cotations == null) {
+            
+            $this->addFlash('danger', "Aucune évaluation n'est créée");
+            return $this->redirectToRoute('autoEvaluation', ['id' => $intership->getId()]);
+        }
+        /**
+         * Nous allons vérifier si toutes les cotations sont correctes
+         * CAD vérifier si toutes les sous-compétences ont une côte
+         * Les côtes définies sont NA--,NA-, A+ et A++
+         */
+        $nbCotationError = 0;
+        foreach ($cotations as $cotation) {
+            foreach ($cotation->getsubSkillcotation() as $subcotation) {
+                if ($subcotation->getCotation() == 0) {
+                    $nbCotationError++;
+                }
+            }
+        }
+
+        /**
+         * Si il y a des erreurs, l'utilisateur sera redirigé vers la page d'évaluation de l'étudiant
+         */
+        if ($nbCotationError != 0) {
+            $this->addFlash('danger',  $nbCotationError . " sous-compétence(s) n'est/ne sont pas évaluée(s)");
+            return $this->redirectToRoute('autoEvaluation', ['id' => $intership->getId()]);
+        }
+
+        /**
+         * Recherche les évaluations dans la Base de données
+         */
+        $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['user'=>$this->security->getUser()->getId()]);
+        foreach ($evaluations as $evaluation) {
+            foreach ($evaluation->getCotation() as $cotationEvaluated) {
+                if ($cotationEvaluated->getUser() == $this->security->getUser() && $cotationEvaluated->getIntership() == $intership) {
+                    if($evaluation->getPosition() != ''){
+                        if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
+                            /**
+                             * Lorsque le formulaire est validé
+                             */
+                            if ($form->isSubmitted()) {
+                                $html = $this->renderView('evaluation/evaluationStudent.html.twig', [
+                                    'evaluation' => $evaluation
+                                ]);
+                                $snappy->setOption('header-left',"Encodé par Mr/Mme ".$this->security->getUser()->getFirstName().' '.$this->security->getUser()->getLastName());
+                                $snappy->setOption('header-line', true);
+                                $snappy->setOption('footer-line', true);
+                                $snappy->setOption('footer-center','Page [page] of [topage]');
+                                $evaluation->setState("Fini");
+                               
+
+                                $this->em->flush();
+                                return new PdfResponse(
+                                    $snappy->getOutputFromHtml($html),
+                                    'Auto-Evaluation.pdf'
+                                );
+                            }
+                            return $this->render('evaluation/generatePDF.html.twig', [
+                                'evaluation' => $evaluation,
+                                'form' => $form->createView()
+                            ]);
+                        }
+                        $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
+                        return $this->redirectToRoute('autoEvaluation', ['id' => $intership->getId()]); 
+                    }
+                    else{
+                        $this->addFlash('danger','Aucune position détaillée pour l\'évaluation');
+                        return $this->redirectToRoute('autoEvaluation', ['id' => $intership->getId()]);
+                    } 
+                }
+            }
+        }
+    }
+
+
+
+    //Les méthodes suivantes ne sont possibles que si l'utilisateur a le rôle Référent
+
 
     /**
      * @Route("/evaluation/referent/intership",name="viewReferentEvaluation")

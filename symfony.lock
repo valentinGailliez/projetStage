@@ -605,6 +605,9 @@
     "twig/twig": {
         "version": "v3.2.1"
     },
+    "vgrem/php-spo": {
+        "version": "v2.4.4"
+    },
     "webmozart/assert": {
         "version": "1.9.1"
     }

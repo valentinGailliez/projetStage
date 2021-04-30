@@ -64,6 +64,12 @@ class Evaluation
      */
     private $note;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="evaluations")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
     public function __construct()
     {
         $this->cotation = new ArrayCollection();
@@ -196,6 +202,18 @@ class Evaluation
     public function setNote(?string $note): self
     {
         $this->note = $note;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

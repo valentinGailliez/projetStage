@@ -23,6 +23,7 @@
 		<thead>
 			<td>Nom de l'étudiant</td>
 			<td>Prénom de l'étudiant</td>
+			<td>Date de Rencontre</td>
 			<td>Consulter l'évaluation</td>
 		</thead>
 
@@ -31,6 +32,7 @@
 				<tr>
 					<td>{{evaluation.cotation[0].user.lastname}}</td>
 					<td>{{evaluation.cotation[0].user.firstname}}</td>
+					<td>{{evaluation.dateCreation| date('d/m/Y')}}</td>
 					<td>
 						<a class="btn btn-success" href="{{path('viewStudentEvaluation',{'id':evaluation.id})}}">Consulter l'évaluation</a>
 					</td>

@@ -110,13 +110,27 @@ error: function () {}
 										<option {% if evaluation.position == 'Après stage' %} selected="selected" {% endif %} value="Après stage">Après stage</option>
 									</select>
 							<a class="btn btn-success" href="{{path('endEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
-							{% else %}
-								{% if app.request.get('_route') == "viewStudentEvaluation" %}
-								<a class="btn btn-success" href="{{path('sendMailToStudent',{'id':evaluation.id})}}"> Envoyer un mail à l'étudiant</a>
-								<a class="btn btn-success" href="{{path('viewCloturedEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Retourner à la page précédente</a>
-								{% endif %}
+							{% endif %}
+							{% if app.request.get('_route') == "viewStudentEvaluation" %}
+							<a class="btn btn-success" href="{{path('sendMailToStudent',{'id':evaluation.id})}}"> Envoyer un mail à l'étudiant</a>
+							<a class="btn btn-success" href="{{path('viewCloturedEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Retourner à la page précédente</a>
+							{% endif %}
+
+							{% if app.request.get('_route') == "autoEvaluation" %}
+							Quelle est la position de l'auto-évaluation?
+							<select class="form-select form-select-lg mb-3" id="{{evaluation.id}}" aria-label="form-select-lg example">
+
+										<option {% if evaluation.position == '' %} selected="selected" {% endif %} disabled value="">Position de l'évaluation</option>
+										<option {% if evaluation.position == 'Préparation de stage' %} selected="selected" {% endif %} value="Préparation de stage">Préparation de stage</option>
+										<option {% if evaluation.position == 'Rencontre' %} selected="selected" {% endif %} value="Rencontre">Rencontre</option>
+										<option {% if evaluation.position == 'Rapport' %} selected="selected" {% endif %} value="Rapport">Rapport</option>
+										<option {% if evaluation.position == 'Après stage' %} selected="selected" {% endif %} value="Après stage">Après stage</option>
+									</select>
+							<a class="btn btn-success" href="{{path('endAutoEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Clôturer l'auto-évaluation</a>
+							{% endif %}
+							
 								
-						{% endif %}
+						
 					</div>
 
 				</nav>

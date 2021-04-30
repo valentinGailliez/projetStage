@@ -70,11 +70,17 @@ class User implements UserInterface
      */
     private $interships;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Evaluation::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $evaluations;
+
 
     public function __construct()
     {
         $this->intership = new ArrayCollection();
         $this->interships = new ArrayCollection();
+        $this->evaluations = new ArrayCollection();
     }
 
 
@@ -252,6 +258,36 @@ class User implements UserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection|Evaluation[]
+     */
+    public function getEvaluations(): Collection
+    {
+        return $this->evaluations;
+    }
+
+    public function addEvaluation(Evaluation $evaluation): self
+    {
+        if (!$this->evaluations->contains($evaluation)) {
+            $this->evaluations[] = $evaluation;
+            $evaluation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvaluation(Evaluation $evaluation): self
+    {
+        if ($this->evaluations->removeElement($evaluation)) {
+            // set the owning side to null (unless already changed)
+            if ($evaluation->getUser() === $this) {
+                $evaluation->setUser(null);
+            }
+        }
+
+        return $this;
     }
     
 }
