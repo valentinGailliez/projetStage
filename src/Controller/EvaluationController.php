@@ -13,14 +13,19 @@ use App\Form\FileSendFormType;
 use App\Entity\GlobalEvaluation;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
+use Symfony\Component\Finder\Finder;
+use Office365\SharePoint\ClientContext;
 use Doctrine\ORM\EntityManagerInterface;
+use Office365\Runtime\Auth\UserCredentials;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,12 +34,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 class EvaluationController extends AbstractController
 {
 
-    private $em,$mailer,$security;
-    public function __construct(EntityManagerInterface $entityManager,MailerInterface $mailer, Security $security)
+    private $em,$mailer,$security,$kernel;
+    public function __construct(EntityManagerInterface $entityManager,MailerInterface $mailer, Security $security, KernelInterface $kernel)
     {
         $this->em = $entityManager;
         $this->mailer=$mailer;
         $this->security = $security;
+        $this->kernel = $kernel;
     }
 
 
@@ -51,6 +57,7 @@ class EvaluationController extends AbstractController
     }
     /**
      * @Route("/evaluation/intership/{id}", name="viewEvaluation")
+     * @IsGranted("ROLE_TEACHER")
      */
     public function listStudent(Intership $intership): Response
     {
@@ -73,6 +80,7 @@ class EvaluationController extends AbstractController
     /**
      * @Route("/evaluation/{id}/evaluer/{idIntership}",name="listEvaluation")
      * @ParamConverter("intership", options={"id" = "idIntership"})
+     * @IsGranted("ROLE_TEACHER")
      */
     public function listSkills(User $student, Intership $intership, Request $request): Response
     {
@@ -129,6 +137,7 @@ class EvaluationController extends AbstractController
     /**
      * @Route("/evaluation/cloture/{id}/{idIntership}",name="endEvaluation")
      *  @ParamConverter("intership", options={"id" = "idIntership"})
+     * @IsGranted("ROLE_TEACHER")
      */
     public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
     {
@@ -262,6 +271,7 @@ class EvaluationController extends AbstractController
 
     /**
      *  @Route("/evaluation/cloture/{id}",name="viewCloturedEvaluation")
+     * @IsGranted("ROLE_TEACHER")
      */
     public function viewFinishedEvaluation(Intership $intership){
         $evaluations = $this->em->getRepository(Evaluation::class)->findBy(["state"=>"Fini"]);
@@ -278,6 +288,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/email/student/{id}",name="sendMailToStudent")
+     * @IsGranted("ROLE_TEACHER")
      */
     public function sendMailToStudent(Evaluation $evaluation){
         $email = (new TemplatedEmail())
@@ -297,6 +308,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/{id}",name="viewStudentEvaluation")
+     * @IsGranted("ROLE_TEACHER")
      */
     public function viewStudentEvaluation(Evaluation $evaluation){
         return $this->render('evaluation/evaluateStudent.html.twig',[
@@ -306,6 +318,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/etudiant/intership",name="studentEvaluationIntership")
+     * @IsGranted("ROLE_STUDENT")
      */
     public function listEvaluationStudent():Response{
 
@@ -318,7 +331,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/autoevaluation/{id}",name="autoEvaluation")
-     *  
+     * @IsGranted("ROLE_STUDENT")  
      */
     public function AutoEvaluation(Intership $intership){
         $evaluations = $this->em->getRepository(Evaluation::class)->findBy(['typeEvaluation'=>'Auto-Evaluation','user'=>$this->security->getUser()->getId(),'state'=>'Modification']);
@@ -371,13 +384,13 @@ class EvaluationController extends AbstractController
     }
     /**
      * @Route("/evaluation/etudiant/{id}",name="sendDocument")
+     *  @IsGranted("ROLE_STUDENT")
      */
     public function sendDocument(Intership $intership,Request $request){
         $form = $this->createForm(FileSendFormType::class);
         $form->handleRequest($request);
         if($form->isSubmitted()){
-            
-            dd($request->files->get('file_send_form'));
+            $this->uploadFile($request);
         }
         return $this->render('evaluation_student/sendDocument.html.twig',[
             'intership'=>$intership,
@@ -387,6 +400,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/consultation/{id}",name="ConsultationEvaluation")
+     *  @IsGranted("ROLE_STUDENT")
      */
     public function consultationEvaluation(Evaluation $evaluation){
         return $this->render('evaluation/evaluateStudent.html.twig', [
@@ -396,6 +410,7 @@ class EvaluationController extends AbstractController
 
 /**
      * @Route("/evaluation/student/cloture/{id}",name="endAutoEvaluation")
+     *  @IsGranted("ROLE_STUDENT")
      */
     public function endAutoEvaluation(Intership $intership, Request $request, Snappy $snappy)
     {
@@ -490,6 +505,7 @@ class EvaluationController extends AbstractController
 
     /**
      * @Route("/evaluation/referent/intership",name="viewReferentEvaluation")
+     *  @IsGranted("ROLE_REFERENT")
      */
     public function viewReferentIntership():Response{
         $listIntership = $this->em->getRepository(Intership::class)->findAll();
@@ -517,6 +533,7 @@ class EvaluationController extends AbstractController
 
 /**
      * @Route("/evaluation/referent/intership/{id}", name="viewReferentStudentEvaluation")
+     *  @IsGranted("ROLE_REFERENT")
      */
     public function listReferentStudent(Intership $intership): Response
     {
@@ -536,8 +553,18 @@ class EvaluationController extends AbstractController
 
             'listGlobalEvaluation'=>$listGlobalEvaluations
         ]);
+
+
+
     }
 
+        /**
+         * @Route("/evaluation/referent/{id}",name="viewGlobalEvaluation")
+         * @IsGranted("ROLE_REFERENT")
+         */
+        public function evaluationGlobal(GlobalEvaluation $globalEvaluation){
+            
+        }
 
 
     //Les méthodes suivantes ne renvoient pas de page. Elles agissent lors d'une interaction avec la page
@@ -632,5 +659,37 @@ class EvaluationController extends AbstractController
             $this->mailer->send($email);
         }
 
+    }
+
+
+    private function uploadFile(Request $request){
+
+        $filesystem = new Filesystem();
+        try {
+            $userName = "gestion-stage@helha.be";
+            $password = "H€lh@!Ext21";
+            $credentials = new UserCredentials($userName, $password);
+            $ctx = (new ClientContext("https://helha.sharepoint.com/sites/gestion-stage"))->withCredentials($credentials);
+
+            $files = $request->files->get('file_send_form');
+            foreach($files as $file){
+            $filename = $file->getClientOriginalName();
+            
+                $filesystem->copy($file,$this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().'.pdf');
+                $filename = $this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".pdf"; 
+                
+            }
+
+            $targetLibraryTitle = "Documents";
+            $targetList = $ctx->getWeb()->getLists()->getByTitle($targetLibraryTitle);
+
+                $uploadFile = $targetList->getRootFolder()->uploadFile(basename($filename),file_get_contents($filename));
+                $ctx->executeQuery();
+                print "File {$uploadFile->getServerRelativeUrl()} has been uploaded\r\n";
+                $filesystem->remove($this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".pdf");
+        }
+        catch (Exception $e) {
+            echo 'Error: ',  $e->getMessage(), "\n";
+        }
     }
 }

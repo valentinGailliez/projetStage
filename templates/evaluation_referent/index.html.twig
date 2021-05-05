@@ -22,12 +22,12 @@
 					<td>{{globalEvaluation.evaluations[0].cotation[0].user.lastname}}</td>
 					<td>{{globalEvaluation.evaluations[0].cotation[0].user.firstname}}</td>
 					<td>
-						<a class="btn btn-secondary" href="{{path('listEvaluation',{'id' : globalEvaluation.evaluations[0].cotation[0].user.id,'idIntership':globalEvaluation.evaluations[0].cotation[0].intership.id})}}">
+						<a class="btn btn-secondary" href="{{path('viewGlobalEvaluation',{'id':globalEvaluation.id})}}">
 							Evaluer
 						</a>
 					</td>
 					<td>
-						<a class="btn btn-success" href="{{path('endEvaluation',{'id':globalEvaluation.evaluations[0].cotation[0].user.id,'idIntership':globalEvaluation.evaluations[0].cotation[0].intership.id})}}">
+						<a class="btn btn-success" href="{{path('viewGlobalEvaluation',{'id':globalEvaluation.id})}}">
 							Clôturer l'évaluation
 						</a>
 					</td>
