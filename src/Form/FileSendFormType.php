@@ -13,14 +13,7 @@ class FileSendFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('file',FileType::class,['label' => 'Envoyer un pdf','constraints' => [
-                new File([
-                    'mimeTypes' => [
-                        '*.pdf'
-                    ],
-                    'mimeTypesMessage' => 'Please upload a valid PDF document',
-                ])
-            ]])
+            ->add('file',FileType::class,['label' => 'Envoyer un pdf'])
         ;
     }
 

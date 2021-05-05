@@ -391,6 +391,7 @@ class EvaluationController extends AbstractController
         $form->handleRequest($request);
         if($form->isSubmitted()){
             $this->uploadFile($request);
+            $this->addFlash("success","Le fichier est bien partagé dans le Share Point");
         }
         return $this->render('evaluation_student/sendDocument.html.twig',[
             'intership'=>$intership,
@@ -685,7 +686,6 @@ class EvaluationController extends AbstractController
 
                 $uploadFile = $targetList->getRootFolder()->uploadFile(basename($filename),file_get_contents($filename));
                 $ctx->executeQuery();
-                print "File {$uploadFile->getServerRelativeUrl()} has been uploaded\r\n";
                 $filesystem->remove($this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".pdf");
         }
         catch (Exception $e) {
