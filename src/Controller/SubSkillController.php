@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class SubSkillController extends AbstractController
 {
 
@@ -32,6 +33,7 @@ class SubSkillController extends AbstractController
 
     /**
      * @Route("/subskill/{id}/create",name="createSubSkill")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function create(Skill $skill, Request $request): Response
     {
@@ -62,6 +64,7 @@ class SubSkillController extends AbstractController
     }
     /**
      * @Route("/subskill/{id}/delete", name="deleteSubSkill")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function delete(SubSkill $subSkill)
     {
@@ -75,6 +78,7 @@ class SubSkillController extends AbstractController
 
     /**
      * @Route("/subskill/{id}/update",name="updateSubSkill")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function update(SubSkill $subSkill, Request $request)
     {

@@ -28,10 +28,14 @@
 				<td>Bloc</td>
 				<td>Période de stage</td>
 				<td>Année académique</td>
+				<td>Consulter les données du stage</td>
+				{% if is_granted('ROLE_ADMIN') %}
+			
 				<td>Attribuer des compétences</td>
 				<td>Nommer le(s) référent(s) à ce stage</td>
 				<td>Modifier le stage</td>
 				<td>Supprimer le stage</td>
+				{% endif %}
 			</thead>
 			<tbody>
 				<tr>
@@ -56,6 +60,9 @@
 							-
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
+						<td><a class='btn btn-success'>Consulter les données du stage</a></td>
+						{% if is_granted('ROLE_ADMIN') %}
+			
 						{% if date < intership.firstday %}
 						<td><a class="btn btn-success" href="{{path('skillIntership',{'id':intership.id})}}">Attribuer des compétences</a></td>
 						<td><a class="btn btn-success"href="{{path('referentIntership',{'id':intership.id})}}" >Nommer les référents à ce stage</a></td>
@@ -66,6 +73,7 @@
 						<td><b> Vous ne pouvez pas nommer les référents</b></td>
 							<td><b>Stage Non Modifiable</b></td>
 							<td><b>Stage Non Supprimable</b></td>
+						{% endif %}
 						{% endif %}
 					</tr>
 				{% endfor %}

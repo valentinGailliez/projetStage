@@ -6,6 +6,8 @@ use App\Entity\ApplicationField;
 use App\Entity\Skill;
 use App\Entity\SubSkill;
 use App\Form\SkillFormType;
+
+use Symfony\Component\Security\Core\Security;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,10 +19,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class SkillController extends AbstractController
 {
-    private $em;
-    public function __construct(EntityManagerInterface $entityManager)
+    private $em,$security;
+    public function __construct( Security $security,EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
+        $this->security = $security;
     }
 
     /**
@@ -28,7 +31,17 @@ class SkillController extends AbstractController
      */
     public function list(): Response
     {
-        $skills = $this->em->getRepository(Skill::class)->findAll();
+        if($this->security->getUser()->getApplicationField() == null){
+
+            $skills = $this->em->getRepository(Skill::class)->findAll();
+        }
+        else{
+            $applicationParent = $this->security->getUser()->getApplicationField();
+            while ($applicationParent->getType() != "category") {
+                $applicationParent = $applicationParent->getParent();
+            }
+            $skills = $this->em->getRepository(Skill::class)->findBy(['domain'=>$applicationParent->getId()]);
+        }
         return $this->render('skill/listSkill.html.twig', [
             'skills' => $skills
         ]);
@@ -36,6 +49,7 @@ class SkillController extends AbstractController
 
     /**
      * @Route("/skill/create",name="createSkill")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function create(Request $request): Response
     {
@@ -65,6 +79,7 @@ class SkillController extends AbstractController
     }
     /**
      * @Route("/skill/update/{id}",name="updateSkill")
+     *  @IsGranted("ROLE_ADMIN")
      */
     public function update(Skill $skill, Request $request): Response
     {
@@ -92,6 +107,7 @@ class SkillController extends AbstractController
 
     /**
      * @Route("/skill/delete/{id}",name="deleteSkill")
+     *  @IsGranted("ROLE_ADMIN")
      */
     public function delete(Skill $skill): Response
     {

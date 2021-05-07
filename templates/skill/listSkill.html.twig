@@ -14,8 +14,9 @@
 			<td>Numéro de compétence</td>
 			<td>Nombre de sous-compétences</td>
 			<td>Voir les sous-compétences</td>
-			<td>Modifier la compétence</td>
-			<td>Supprimer la compétence</td>
+			{% if is_granted('ROLE_ADMIN') %}
+								<td>Modifier la compétence</td>
+			<td>Supprimer la compétence</td>{% endif %}
 		</thead>
 
 		<tbody>
@@ -30,7 +31,7 @@
 							Voir la liste des sous-compétence
 						</a>
 					</td>
-					<td>
+					{% if is_granted('ROLE_ADMIN') %}<td>
 						<a class="btn btn-warning" href="{{path('updateSkill',{'id':skill.id})}}">
 							Modifier
 						</a>
@@ -40,9 +41,12 @@
 							Supprimer compétence
 						</a>
 					</td>
+					{% endif %}
 				</tr>
 			</tbody>
 		{% endfor %}
 	</table>
+	{% if is_granted('ROLE_ADMIN') %}
 	<a class="btn btn-warning" href="{{path('createSkill')}}">Créer une compétence</a>
+	{% endif %}
 {% endblock %}
