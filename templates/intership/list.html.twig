@@ -60,7 +60,7 @@
 							-
 							{{intership.lastDay | date("d/m/Y") }}</td>
 						<td>{{intership.ansco}}</td>
-						<td><a class='btn btn-success'>Consulter les données du stage</a></td>
+						<td><a class='btn btn-success' href="{{path('viewIntership',{'id':intership.id})}}">Consulter les données du stage</a></td>
 						{% if is_granted('ROLE_ADMIN') %}
 			
 						{% if date < intership.firstday %}
@@ -79,8 +79,9 @@
 				{% endfor %}
 			</tbody>
 		</tbody>
-	</table>
-	<a class="btn btn-warning" href="{{path('createIntership')}}">Créer un stage</a>
+	</table>{% if is_granted('ROLE_ADMIN') %}
+			
+	<a class="btn btn-warning" href="{{path('createIntership')}}">Créer un stage</a>{% endif %}
 </div>{% endblock %}
 {% block javascripts %}
 {{parent()}}<script>

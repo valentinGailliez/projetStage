@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Stages
+{% endblock %}
+
+{% block body %}
+	
+
+
+	<div>
+		<h1>Données de stage</h1><br>
+        <h2>Informations Cours </h2>
+<h4>
+        {% if intership.applicationField.parent.type != "sub_section" %}
+							Domaine : {{intership.applicationField.parent.parent.parent.parent.name}}<br>
+							
+							Lieu : {{intership.applicationField.parent.parent.name}}<br>
+							
+								Section : {{intership.applicationField.parent.name}}<br>
+						{% else %}
+							Domaine : {{intership.applicationField.parent.parent.parent.parent.parent.name}}<br>
+							
+							Lieu : {{intership.applicationField.parent.parent.parent.name}}<br>
+							Section / Sous-section : {{intership.applicationField.parent.parent.name}}
+								/
+								{{intership.applicationField.parent.name}}<br>
+
+						{% endif %}
+						Bloc : {{intership.applicationField.name}}</h4>
+		
+        <h2>Informations Stage</h2>
+
+        <h4> Début de stage : {{intership.firstDay | date("d/m/Y")}}<br>
+						
+			Fin de stage : {{intership.lastDay | date("d/m/Y") }}<br>
+			Année académique : {{intership.ansco}}</h4>
+
+        <h2>Liste des référents</h2>
+        
+		<table class="table table-striped">
+        <thead>
+			<td>Listes des référents</td>
+			
+			
+		</thead>
+
+		<tbody>
+			{% for referent in intership.referents %}
+				<tr>
+					<td>{{referent.lastname}} {{referent.firstname}}</td>
+					
+				</tr>
+			</td>
+		</tbody>
+	{% endfor %}
+</table>
+
+<h2>Liste des compétences </h2>
+<table class="table table-striped">
+		<thead>
+			<td>Nom de compétence</td>
+			<td>Domaine</td>
+			<td>Numéro de compétence</td>
+		</thead>
+
+		<tbody>
+			{% for skill in intership.skills%}
+				<tr>
+					<td>{{skill.name}}</td>
+					<td>{{skill.domain.name}}</td>
+					<td>{{skill.skillNumber}}</td>
+					
+				</tr>
+			</td>
+		</tbody>
+	{% endfor %}
+</table>
+</div>{% endblock %}
