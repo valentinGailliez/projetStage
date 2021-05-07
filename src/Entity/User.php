@@ -61,7 +61,6 @@ class User implements UserInterface
     private $password;
     /**
      * @ORM\ManyToOne(targetEntity=ApplicationField::class, inversedBy="users")
-     * @ORM\JoinColumn(nullable=false)
      */
     private $applicationField;
 
@@ -74,6 +73,11 @@ class User implements UserInterface
      * @ORM\OneToMany(targetEntity=Evaluation::class, mappedBy="user", orphanRemoval=true)
      */
     private $evaluations;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $hasSharedFile;
 
 
     public function __construct()
@@ -286,6 +290,18 @@ class User implements UserInterface
                 $evaluation->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHasSharedFile(): ?bool
+    {
+        return $this->hasSharedFile;
+    }
+
+    public function setHasSharedFile(?bool $hasSharedFile): self
+    {
+        $this->hasSharedFile = $hasSharedFile;
 
         return $this;
     }

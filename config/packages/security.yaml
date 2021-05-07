@@ -43,7 +43,7 @@ security:
         ROLE_STUDENT : ROLE_USER
         ROLE_TEACHER : ROLE_USER
         ROLE_REFERENT : ROLE_TEACHER
-        ROLE_ADMIN : [ROLE_STUDENT, ROLE_REFERENT, ROLE_ALLOW_TO_SWITCH]
+        ROLE_ADMIN : [ROLE_USER]
     
     access_control:
        -  { path: '^/evaluation/student', roles: ROLE_STUDENT }

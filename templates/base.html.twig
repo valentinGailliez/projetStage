@@ -17,7 +17,7 @@
 				<script>
 
 		$(document).ready(function () { // When you change your position
-$("select").each(function () {
+$("select[name='position']").each(function () {
 $(this).change(function () {
 var evaluation = $(this).attr('id')
 var position = $(this).children("option:selected").val()
@@ -34,6 +34,25 @@ success: function (data, status) {},
 error: function () {}
 });
 })
+})
+
+$("input").each(function(){
+	$(this).change(function(){
+		var evaluation = $(this).attr('name')
+		var cotation = $(this).val()
+		$.ajax({
+			url: "/cotation/final",
+type: 'get',
+data: {
+'evaluation': evaluation,
+'cote': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+		})
+	})
 })
 		})
 
@@ -83,14 +102,18 @@ error: function () {}
 								
 								<a class="nav-link active" aria-current="page" href="{{path('viewEvaluationIntership')}}">
 									<span data-feather="home"></span>
-									Evaluation (Enseignant-Visiteur)
+									Evaluation
 								</a>
 								{% endif %}
 								
 								{% if is_granted('ROLE_STUDENT') %}
 								<a class="nav-link active" aria-current="page" href="{{path('studentEvaluationIntership')}}">
 									<span data-feather="home"></span>
-									Evaluation (Etudiant)
+									Evaluation
+								</a>
+								<a class="nav-link active" aria-current="page" href="{{path('consultationStudent')}}">
+									<span data-feather="home"></span>
+									Consultation
 								</a>
 								{% endif %}
 								{% if is_granted('ROLE_REFERENT') %}
@@ -99,6 +122,11 @@ error: function () {}
 									Evaluation (Référent)
 								</a>
 								{% endif %}
+
+								{% if is_granted('ROLE_SECRETARIAT') %}
+								<a class="btn btn-success" aria-current="page" href="{{path('index')}}">Partager les évaluations globales</a>
+								{% endif %}
+								
 							</li>
 
 						</ul>
@@ -123,7 +151,7 @@ error: function () {}
 
 							{% if app.request.get('_route') == "autoEvaluation" %}
 							Quelle est la position de l'auto-évaluation?
-							<select class="form-select form-select-lg mb-3" id="{{evaluation.id}}" aria-label="form-select-lg example">
+							<select name='position'class="form-select form-select-lg mb-3" id="{{evaluation.id}}" aria-label="form-select-lg example">
 
 										<option {% if evaluation.position == '' %} selected="selected" {% endif %} disabled value="">Position de l'évaluation</option>
 										<option {% if evaluation.position == 'Préparation de stage' %} selected="selected" {% endif %} value="Préparation de stage">Préparation de stage</option>
@@ -131,7 +159,15 @@ error: function () {}
 										<option {% if evaluation.position == 'Rapport' %} selected="selected" {% endif %} value="Rapport">Rapport</option>
 										<option {% if evaluation.position == 'Après stage' %} selected="selected" {% endif %} value="Après stage">Après stage</option>
 									</select>
-							<a class="btn btn-success" href="{{path('endAutoEvaluation',{'id':evaluation.cotation[0].intership.id})}}">Clôturer l'auto-évaluation</a>
+							<a class="btn btn-success" href="{{path('endAutoEvaluation',{'id':evaluation.id})}}">Clôturer l'auto-évaluation</a>
+							{% endif %}
+
+							{% if app.request.get('_route') == "viewGlobalEvaluation" %}
+
+							Quelle est la note finale à attribuer de l'évaluation?
+							
+<input type='text' id="finaleCotation" name="{{evaluation.id}}" placeholder="Note finale" value="{{evaluation.finalCotation}}"/>
+							<a class="btn btn-success" href="{{path('endFinalEvaluation',{'id':evaluation.id})}}">Clôturer l'évaluation</a>
 							{% endif %}
 							
 								

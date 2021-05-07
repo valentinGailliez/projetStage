@@ -1,0 +1,78 @@
+{% block stylesheets %}
+	<!-- CSS only -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+{% endblock %}
+
+{% block javascripts %}
+
+	{{ encore_entry_script_tags('app') }}
+
+{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<h1>
+				<u>
+					Évaluation de
+					{{evaluation.evaluations[0].cotation[0].user.lastname}}
+					{{evaluation.evaluations[0].cotation[0].user.firstname}}
+				</u>
+			</h1>
+
+<h2>Année académique :
+{{evaluation.evaluations[0].cotation[0].intership.ansco}}</h2><br>
+				
+
+    
+                
+
+
+				<table class="table table-striped">
+					<thead>
+						<td>Numéro de la compétence</td>
+						<td>Nom de la compétence</td>
+						
+                        <td>Note finale de la compétence</td>
+					</thead>
+
+					<tbody>
+                        {% for globalSkill in evaluation.globalEvaluationSkill %}
+				        	<tr>
+
+								<td>C{{globalSkill.skill.skillNumber}}</td>
+								<td>{{globalSkill.skill.name}}</td>
+
+
+								<td>
+                               
+										{% if globalSkill.cotation == 1 %}
+											<font style='color:red'>Non acquis</font>
+										{% else %}
+											{% if globalSkill.cotation == 2 %}
+												En phase d'acquisition
+											{% else %}
+													Acquis
+											{% endif %}
+										{% endif %}
+									</td>
+
+							</tr>
+           
+{% endfor %}
+					</tbody>
+				</table>
+
+                <h3>Cote finale /20 : {{evaluation.finalCotation}}</h3>
+               
+			</div>
+            
+				<br>
+				
+
+					
+			</div>
+		</div>
+	</div>
+{% endblock %}
+

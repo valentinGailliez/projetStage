@@ -18,7 +18,7 @@ class GlobalEvaluationSkill
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity=SubSkill::class)
+     * @ORM\ManyToOne(targetEntity=Skill::class)
      * @ORM\JoinColumn(nullable=false)
      */
     private $skill;
@@ -30,7 +30,7 @@ class GlobalEvaluationSkill
     private $globalEvaluation;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="integer")
      */
     private $cotation;
 
@@ -39,12 +39,12 @@ class GlobalEvaluationSkill
         return $this->id;
     }
 
-    public function getSkill(): ?SubSkill
+    public function getSkill(): ?Skill
     {
         return $this->skill;
     }
 
-    public function setSkill(?SubSkill $skill): self
+    public function setSkill(?Skill $skill): self
     {
         $this->skill = $skill;
 

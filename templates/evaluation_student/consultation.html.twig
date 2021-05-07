@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Consultation
+{% endblock %}
+
+{% block body %}
+	
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<h1>Consultation</div>
+	</div>
+    
+			{% for evaluationGlobal in evaluations%}
+            <h2>Année académique : {{evaluationGlobal.evaluations[0].cotation[0].intership.ansco}}</h2>
+            {% if evaluationGlobal.state == "Fini" %}
+            <a class="btn btn-success" href="{{path('consultationResult',{'id':evaluationGlobal.id})}}">Consulter l'évaluation de stage</a>
+{% endif %}	<table class="table table-striped">
+		<thead>
+			<td>Nom de l'évaluateur</td>
+			<td>Prénom de l'évaluateur</td>
+			<td>Date de Rencontre</td>
+			<td>Consulter l'évaluation</td>
+		</thead>
+
+		<tbody>
+            {% for evaluation in evaluationGlobal.evaluations %}
+                
+				<tr>
+					<td>{{evaluation.user.lastname}}</td>
+					<td>{{evaluation.user.firstname}}</td>
+					<td>{{evaluation.dateCreation| date('d/m/Y')}}</td>
+					<td>
+						<a class="btn btn-success" href="{{path('ConsultationEvaluation',{'id':evaluation.id})}}">Consulter l'évaluation</a>
+					</td>
+					
+				</tr>
+			</tbody>
+            {% endfor %}
+	</table>
+    
+		{% endfor %}
+{% endblock %}

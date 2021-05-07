@@ -29,6 +29,21 @@ class GlobalEvaluation
      */
     private $createdDate;
 
+    /**
+     * @ORM\OneToMany(targetEntity=GlobalEvaluationSkill::class,mappedBy="globalEvaluation")
+     */
+    private $skillEvaluation;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $FinalCotation;
+
+    /**
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $state;
+
     public function __construct()
     {
         $this->evaluations = new ArrayCollection();
@@ -82,4 +97,59 @@ class GlobalEvaluation
 
         return $this;
     }
+
+    /**
+     * @return Collection|GlobalEvaluationSkill[]
+     */
+    public function getGlobalEvaluationSkill(): Collection
+    {
+        return $this->skillEvaluation;
+    }
+
+    public function addGlobalEvaluationSkill(GlobalEvaluationSkill $evaluation): self
+    {
+        if (!$this->skillEvaluation->contains($evaluation)) {
+            $this->skillEvaluation[] = $evaluation;
+            $evaluation->setGlobalEvaluation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGlobalEvaluationSkill(GlobalEvaluationSkill $evaluation): self
+    {
+        if ($this->skillEvaluation->removeElement($evaluation)) {
+            // set the owning side to null (unless already changed)
+            if ($evaluation->getGlobalEvaluation() === $this) {
+                $evaluation->setGlobalEvaluation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getFinalCotation(): ?int
+    {
+        return $this->FinalCotation;
+    }
+
+    public function setFinalCotation(?int $FinalCotation): self
+    {
+        $this->FinalCotation = $FinalCotation;
+
+        return $this;
+    }
+
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    public function setState(?string $state): self
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
 }

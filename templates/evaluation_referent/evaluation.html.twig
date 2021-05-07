@@ -15,12 +15,25 @@
 				</u>
 			</h1>
 
-Année académique :
-{{evaluation.evaluations[0].cotation[0].intership.ansco}}<br>
+<h2>Année académique :
+{{evaluation.evaluations[0].cotation[0].intership.ansco}}</h2><br>
 				
 			
                     {% for skill in skills%}
 <h2>{{skill.name}}</h2>
+
+<h2>Cote Compétence : {% for globalEvaluationSkill in evaluation.globalEvaluationSkill %}
+                                {% if globalEvaluationSkill.skill == skill %}
+                                
+                                    <select name="cotation"class="form-select form-select-lg mb-3" id="{{globalEvaluationSkill.id}}" aria-label="form-select-lg example">
+
+										<option {% if globalEvaluationSkill.cotation == 0 %} selected="selected" {% endif %} disabled value="0">Évaluer la compétence</option>
+										<option {% if globalEvaluationSkill.cotation == 1 %} selected="selected" {% endif %} value="1">Non Acquis</option>
+										<option {% if globalEvaluationSkill.cotation == 2 %} selected="selected" {% endif %} value="2">En phase d'évaluation</option>
+										<option {% if globalEvaluationSkill.cotation == 3 %} selected="selected" {% endif %} value="3">Acquis</option>
+									</select>
+                                    {% endif %}
+                                {% endfor %}</h2>
 
 				<table class="table table-striped">
 					<thead>
@@ -93,13 +106,46 @@ Année académique :
                                         {% endfor %}
                                     {% endfor %}
                                 {% endfor %}
-								</td>
+								</td> <td>
+                                
+
+            </td>
 							</tr>
 						{% endfor %}
-            
+           
 					</tbody>
 				</table>
-                
+                <div class="form-group green-border-focus">
+				<table class="table table-striped">
+                <thead>
+						<td>Commentaire Compétence</td>
+						
+					</thead>
+                <tbody>
+                <td>
+                {% set hasComments = 0 %}
+                {% for evaluationItem in evaluation.evaluations %}
+
+                                    {% for cotationItem in evaluationItem.cotation%}
+                                               
+                                                
+                                                    {% if cotationItem.skill == skill %}
+                                                       {% if cotationItem.comments != null %}
+                                                           Mr/Mme {{evaluationItem.user.lastName}} {{evaluationItem.user.firstname}} : {{cotationItem.comments}}</br>
+                                                            {% set hasComments = 1 %}
+                                                       {% endif %}
+                                                       
+                                                    {% endif %}
+                                        {% endfor %}
+                                {% endfor %}
+                                {% if hasComments == 0 %}
+                                Aucun commentaire pour cette compétence{% endif %}
+                                
+                                </td></tbody>
+
+                                </table>
+				<br>
+			</div>
 			{% endfor %}
 				<br>
 				
@@ -114,15 +160,15 @@ Année académique :
 	{{parent()}}<script>
 
 		$(document).ready(function () { // When you change your cotation
-$("select").each(function () {
+$("select[name='cotation']").each(function () {
 $(this).change(function () {
 var subcotation = $(this).attr('id')
 var cotation = $(this).children("option:selected").val()
 $.ajax({
-url: "/evaluation",
+url: "/globalEvaluation",
 type: 'get',
 data: {
-'subSkillCotation': subcotation,
+'evaluation': subcotation,
 'cotation': cotation
 },
 cache: false,
@@ -134,94 +180,7 @@ error: function () {}
 })
 })
 
-// When you change your comments.
 
-$("textarea").each(function () {
-$(this).change(function () {
-	var cotation = $(this).attr('id')
-var comments = $(this).val()
-if($(this).attr('name')=="skillComments"){
-
-	$.ajax({
-		url: "/evaluationComments",
-		type: 'get',
-		data: {
-			'comments': comments,
-			'cotation': cotation
-		},
-		cache: false,
-		datatype: 'json',
-		success: function (data, status) {},
-		error: function () {}
-	});
-}
-else{
-	if($(this).attr('name')=="globalComments"){
-
-		$.ajax({
-			url: "/evaluationArchiveComments",
-			type: 'get',
-			data: {	
-				'comments': comments,
-				'evaluation': cotation
-			},
-			cache: false,
-			datatype: 'json',
-			success: function (data, status) {},
-			error: function () {}
-		});
-	}
-	else{
-		$.ajax({
-			url: "/evaluationNote",
-			type: 'get',
-			data: {
-				'comments': comments,
-				'evaluation': cotation
-			},
-			cache: false,
-			datatype: 'json',
-			success: function (data, status) {},
-			error: function () {}
-		});
-	}
-}
-})
-})
-
-// when you change the subject
-$("#textSubject").change(function () {
-var evaluation = $(this).attr('name')
-var value = $(this).val()
-$.ajax({
-url: "/evaluationArchiveSubject",
-type: 'get',
-data: {
-'subject': value,
-'evaluation': evaluation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
-})
-$("#date").change(function () {
-var evaluation = $(this).attr('name')
-var value = $(this).val()
-	$.ajax({
-url: "/evaluationArchiveDate",
-type: 'get',
-data: {
-'date': value,
-'evaluation': evaluation
-},
-cache: false,
-datatype: 'json',
-success: function (data, status) {},
-error: function () {}
-});
-})
 })
 	</script>
 {% endblock %}

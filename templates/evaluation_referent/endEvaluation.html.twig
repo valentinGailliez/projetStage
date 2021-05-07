@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Évaluation de
+	{{evaluation.evaluations[0].cotation[0].user.lastname}}
+	{{evaluation.evaluations[0].cotation[0].user.firstname}}
+{% endblock %}
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<h1>
+				<u>
+					Évaluation de
+					{{evaluation.evaluations[0].cotation[0].user.lastname}}
+					{{evaluation.evaluations[0].cotation[0].user.firstname}}
+				</u>
+			</h1>
+
+<h2>Année académique :
+{{evaluation.evaluations[0].cotation[0].intership.ansco}}</h2><br>
+				
+
+    
+                
+
+
+				<table class="table table-striped">
+					<thead>
+						<td>Numéro de la compétence</td>
+						<td>Nom de la compétence</td>
+						
+                        <td>Note finale de la compétence</td>
+					</thead>
+
+					<tbody>
+                        {% for globalSkill in evaluation.globalEvaluationSkill %}
+				        	<tr>
+
+								<td>C{{globalSkill.skill.skillNumber}}</td>
+								<td>{{globalSkill.skill.name}}</td>
+
+
+								<td>
+                               
+										{% if globalSkill.cotation == 1 %}
+											<font style='color:red'>Non acquis</font>
+										{% else %}
+											{% if globalSkill.cotation == 2 %}
+												En phase d'acquisition
+											{% else %}
+													Acquis
+											{% endif %}
+										{% endif %}
+									</td>
+
+							</tr>
+           
+{% endfor %}
+					</tbody>
+				</table>
+
+                <h3>Cote finale /20 : {{evaluation.finalCotation}}</h3>
+               
+			</div>
+            
+				<br>
+				{{form_start(form)}}
+			{{form_label(form.save,'Générer PDF')}}
+			{{form_end(form)}}
+			<a class="btn btn-secondary" href="{{path('viewGlobalEvaluation',{'id':evaluation.id})}}">Revenir à son évaluation</a>
+		
+
+					
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
