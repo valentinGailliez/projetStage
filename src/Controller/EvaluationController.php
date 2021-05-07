@@ -4,8 +4,8 @@ namespace App\Controller;
 
 use DateTime;
 use App\Entity\User;
+use App\Entity\Skill;
 use App\Entity\Cotation;
-use App\Entity\SubSkill;
 use App\Entity\Intership;
 use App\Entity\Evaluation;
 use Knp\Snappy\Pdf as Snappy;
@@ -13,7 +13,7 @@ use App\Form\FileSendFormType;
 use App\Entity\GlobalEvaluation;
 use App\Entity\SubSkillCotation;
 use App\Form\SubmitTypeFormType;
-use Symfony\Component\Finder\Finder;
+use App\Entity\GlobalEvaluationSkill;
 use Office365\SharePoint\ClientContext;
 use Doctrine\ORM\EntityManagerInterface;
 use Office365\Runtime\Auth\UserCredentials;
@@ -26,7 +26,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -42,6 +44,8 @@ class EvaluationController extends AbstractController
         $this->security = $security;
         $this->kernel = $kernel;
     }
+
+    
 
 
     /**
@@ -129,32 +133,27 @@ class EvaluationController extends AbstractController
             $this->em->persist($evaluationArchive);
             $this->em->flush();
         
-        return $this->render('evaluation/createEvaluation.html.twig', [
-             'evaluation'=>$evaluationArchive
-        ]);
+        return $this->redirectToRoute('listEvaluation',['id'=>$student->getId(),'idIntership'=>$intership->getId()]);
     }
 
     /**
-     * @Route("/evaluation/cloture/{id}/{idIntership}",name="endEvaluation")
-     *  @ParamConverter("intership", options={"id" = "idIntership"})
+     * @Route("/evaluation/cloture/{id}",name="endEvaluation")
      * @IsGranted("ROLE_TEACHER")
      */
-    public function endEvaluation(User $student, Intership $intership, Request $request, Snappy $snappy)
+    public function endEvaluation(Evaluation $evaluation, Request $request, Snappy $snappy)
     {
         //Création d'un formulaire
         $form = $this->createForm(SubmitTypeFormType::class);
         $form->handleRequest($request);
 
-        //Recherche des cotations en fonction du stage et de l'étudiant
-        $cotations = $this->em->getRepository(Cotation::class)->findBy(['user' => $student->getId(), 'intership' => $intership->getId()]);
-
+        
         /**
          *  Vérifier si il existe des cotations
          *  Si il n'existe pas de cotations, l'utilisateur sera renvoyé sur une autre page
         */
-        if ($cotations == null) {
+        if ($evaluation->getCotation() == null) {
             $this->addFlash('danger', "Aucune évaluation n'est créée");
-            return $this->redirectToRoute('viewEvaluation', ['id' => $intership->getId()]);
+            return $this->redirectToRoute('viewEvaluation', ['id' => $evaluation->getCotation()[0]->getIntership()->getId()]);
         }
 
         /**
@@ -163,7 +162,7 @@ class EvaluationController extends AbstractController
          * Les côtes définies sont NA--,NA-, A+ et A++
          */
         $nbCotationError = 0;
-        foreach ($cotations as $cotation) {
+        foreach ($evaluation->getCotation() as $cotation) {
             foreach ($cotation->getsubSkillcotation() as $subcotation) {
                 if ($subcotation->getCotation() == 0) {
                     $nbCotationError++;
@@ -176,18 +175,15 @@ class EvaluationController extends AbstractController
          */
         if ($nbCotationError != 0) {
             $this->addFlash('danger',  $nbCotationError . " sous-compétence(s) n'est/ne sont pas évaluée(s)");
-            return $this->redirectToRoute('listEvaluation', ['id' => $student->getId(), 'idIntership' => $intership->getId()]);
+            return $this->redirectToRoute('listEvaluation', ['id' => $evaluation->getCotation()[0]->getUser()->getId(), 'idIntership' => $evaluation->getCotation()[0]->getIntership()->getId()]);
         }
 
         /**
          * Recherche les évaluations dans la Base de données
          */
-        $evaluations = $this->em->getRepository(Evaluation::class)->findAll();
-        foreach ($evaluations as $evaluation) {
             foreach ($evaluation->getCotation() as $cotationEvaluated) {
-                if ($cotationEvaluated->getUser() == $student && $cotationEvaluated->getIntership() == $intership) {
                     if($evaluation->getPosition() != ''){
-                        if($intership->getFirstDay()<$evaluation->getDateCreation() && $intership->getLastDay()>$evaluation->getDateCreation()){
+                        if($evaluation->getCotation()[0]->getIntership()->getFirstDay()<$evaluation->getDateCreation() && $evaluation->getCotation()[0]->getIntership()->getLastDay()>$evaluation->getDateCreation()){
                             /**
                              * Lorsque le formulaire est validé
                              */
@@ -249,7 +245,7 @@ class EvaluationController extends AbstractController
                                 $this->notify($evaluation);
                                 return new PdfResponse(
                                     $snappy->getOutputFromHtml($html),
-                                    'evaluation_' . $student->getFirstName() . '_' . $student->getLastName() . '.pdf'
+                                    'evaluation_' . $evaluation->getCotation()[0]->getUser()->getFirstName() . '_' . $evaluation->getCotation()[0]->getUser()->getLastName() . '.pdf'
                                 );
                             }
                             return $this->render('evaluation/generatePDF.html.twig', [
@@ -258,14 +254,12 @@ class EvaluationController extends AbstractController
                             ]);
                         }
                         $this->addFlash('danger','La date de visite ne coincide pas avec l\'intervalle de stage');
-                        return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]); 
+                        return $this->redirectToRoute('viewEvaluation',['id'=>$evaluation->getCotation()[0]->getIntership()->getId()]); 
                     }
                     else{
                         $this->addFlash('danger','Aucune position détaillée pour l\'évaluation');
-                        return $this->redirectToRoute('viewEvaluation',['id'=>$intership->getId()]);
+                        return $this->redirectToRoute('viewEvaluation',['id'=>$evaluation->getCotation()[0]->getIntership()->getId()]);
                     } 
-                }
-            }
         }
     }
 
@@ -315,6 +309,64 @@ class EvaluationController extends AbstractController
             'evaluation'=>$evaluation
         ]);
     }
+
+    /**
+     * @Route("/evaluation/document/{id}",name="viewDocumentSent")
+     * @IsGranted("ROLE_TEACHER")
+     */
+    public function viewDocumentSent(Intership $intership){
+        $students = $this->em->getRepository(User::class)->findBy(["type"=>"Etudiant","applicationField"=>$intership->getApplicationField()]);
+        
+        return $this->render('evaluation/viewDocuments.html.twig', [
+            'students' => $students,
+            
+        ]);
+    }
+
+
+    /**
+     * 
+     * @return BinaryFileResponse
+     * @Route("/evaluation/download/{id}",name="downloadFile")
+     * @IsGranted("ROLE_TEACHER")
+     */
+    public function downloadFile(User $user){
+
+        $userName = "gestion-stage@helha.be";
+        $password = "H€lh@!Ext21";
+
+        $credentials = new UserCredentials($userName, $password);
+        $ctx = (new ClientContext("https://helha.sharepoint.com/sites/gestion-stage"))->withCredentials($credentials);
+
+        $sourceFileUrl = '/sites/gestion-stage/Documents%20partages/doc_'.$user->getLastName().'.zip';
+        $headers = @get_headers($sourceFileUrl);
+        if(strpos($headers[0],'200')==false){
+            $this->addFlash("danger","Ce fichier n'existe pas!");
+            return $this->redirectToRoute("ErrorPage");
+        }
+
+        $fileContent = \Office365\SharePoint\File::openBinary($ctx, $sourceFileUrl);
+        
+        $fileName = join(DIRECTORY_SEPARATOR,[sys_get_temp_dir(),''.$user->getLastName().".zip"]);
+        file_put_contents($fileName,$fileContent);
+
+        if (!file_exists($fileName)){
+           
+            
+        throw $this->createNotFoundException();
+        }
+            
+        $response = new BinaryFileResponse($fileName);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,''.$user->getLastName().".zip");
+
+        return $response;
+
+    }
+
+
+
+
+
 
     /**
      * @Route("/evaluation/etudiant/intership",name="studentEvaluationIntership")
@@ -390,8 +442,9 @@ class EvaluationController extends AbstractController
         $form = $this->createForm(FileSendFormType::class);
         $form->handleRequest($request);
         if($form->isSubmitted()){
+
+
             $this->uploadFile($request);
-            $this->addFlash("success","Le fichier est bien partagé dans le Share Point");
         }
         return $this->render('evaluation_student/sendDocument.html.twig',[
             'intership'=>$intership,
@@ -560,11 +613,31 @@ class EvaluationController extends AbstractController
     }
 
         /**
+         * 
          * @Route("/evaluation/referent/{id}",name="viewGlobalEvaluation")
          * @IsGranted("ROLE_REFERENT")
          */
         public function evaluationGlobal(GlobalEvaluation $globalEvaluation){
-            
+         //recherche compétence dans la db
+         $skills = $this->em->getRepository(Skill::class)->findBy([],['skillNumber'=>'ASC']);
+         $listSkill = [];
+         foreach($skills as $skill){
+             foreach($globalEvaluation->getEvaluations() as $evaluation){
+                 foreach($evaluation->getCotation() as $cotation){
+                     if($cotation->getSkill() == $skill){
+                       
+                        if(!in_array($skill,$listSkill)){
+                             
+                         array_push($listSkill,$skill);
+                     }
+                     }
+                 }
+             }
+         }
+            return $this->render('evaluation_referent/evaluation.html.twig',[
+                'evaluation'=>$globalEvaluation,
+                'skills'=>$listSkill
+            ]);
         }
 
 
@@ -674,10 +747,14 @@ class EvaluationController extends AbstractController
 
             $files = $request->files->get('file_send_form');
             foreach($files as $file){
-            $filename = $file->getClientOriginalName();
+                if($file->getMimeType() != "application/zip"){
+                    $this->addFlash("danger","Attention au type de fichiers");
+                    return;
+                }
+                $filename = $file->getClientOriginalName();
             
-                $filesystem->copy($file,$this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().'.pdf');
-                $filename = $this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".pdf"; 
+                $filesystem->copy($file,$this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().'.zip');
+                $filename = $this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".zip"; 
                 
             }
 
@@ -686,7 +763,9 @@ class EvaluationController extends AbstractController
 
                 $uploadFile = $targetList->getRootFolder()->uploadFile(basename($filename),file_get_contents($filename));
                 $ctx->executeQuery();
-                $filesystem->remove($this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".pdf");
+                $filesystem->remove($this->kernel->getProjectDir()."\public\FileTmp\doc_".$this->security->getUser()->getLastName().".zip");
+                
+            $this->addFlash("success","Le fichier est bien partagé dans le Share Point");
         }
         catch (Exception $e) {
             echo 'Error: ',  $e->getMessage(), "\n";

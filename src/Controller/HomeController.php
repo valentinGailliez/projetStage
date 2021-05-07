@@ -21,64 +21,13 @@ public function __construct(KernelInterface $kernel)
     $this->kernel = $kernel;
 }
 
+  
     /**
-     * @Route("/up", name="up")
+     * @Route("/error",name="ErrorPage")
      */
-    public function index(): Response
-    {
-
-
-        try {
-            $userName = "gestion-stage@helha.be";
-            $password = "H€lh@!Ext21";
-            $credentials = new UserCredentials($userName, $password);
-            $ctx = (new ClientContext("https://helha.sharepoint.com/sites/gestion-stage"))->withCredentials($credentials);
-            $filename = $this->kernel->getProjectDir()."\public\image\LOGO_HELHa_talents.jpg";
-            $targetLibraryTitle = "Documents";
-            $targetList = $ctx->getWeb()->getLists()->getByTitle($targetLibraryTitle);
-
-                $uploadFile = $targetList->getRootFolder()->uploadFile(basename($filename),file_get_contents($filename));
-                $ctx->executeQuery();
-                print "File {$uploadFile->getServerRelativeUrl()} has been uploaded\r\n";
-
-        }
-        catch (Exception $e) {
-            echo 'Error: ',  $e->getMessage(), "\n";
-        }
-
-        die();
-
-    }
-
-    /**
-     * @return BinaryFileResponse
-     * @Route("/down", name="down")
-     */
-    public function getFile()
-    {
-        $userName = "gestion-stage@helha.be";
-        $password = "H€lh@!Ext21";
-
-        $credentials = new UserCredentials($userName, $password);
-        $ctx = (new ClientContext("https://helha.sharepoint.com/sites/gestion-stage"))->withCredentials($credentials);
-
-        $sourceFileUrl = '/sites/gestion-stage/Documents%20partages/LOGO_HELHa_talents.jpg';
-        $fileContent = \Office365\SharePoint\File::openBinary($ctx, $sourceFileUrl);
-        $fileName = join(DIRECTORY_SEPARATOR,[sys_get_temp_dir(),"test.jpg"]);
-        file_put_contents($fileName,$fileContent);
-
-        if (!file_exists($fileName))
-            throw $this->createNotFoundException();
-
-        $response = new BinaryFileResponse($fileName);
-        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,"test.jpg");
-
-        return $response;
-
-
-        die();
-    }
-
+public function errorPage(){
+    return $this->render('home/error.html.twig');
+}
 
 
 

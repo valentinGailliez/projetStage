@@ -20,15 +20,11 @@
 		<h1>Liste des étudiants</div>
 	</div>
 	<table class="table table-striped">
-	<a class="btn btn-success" href="{{path('viewCloturedEvaluation',{'id':intership.id})}}">Consulter les évaluations déjà encodés</a>
-	
-
-	<a class="btn btn-success" href="{{path('viewDocumentSent',{'id':intership.id})}}">Télécharger les documents des étudiants</a>
 		<thead>
 			<td>Nom de l'étudiant</td>
 			<td>Prénom de l'étudiant</td>
-			<td>Evaluer</td>
-			<td>Clôturer l'évaluation</td>
+			<td>Télécharger documents</td>
+			
 		</thead>
 
 		<tbody>
@@ -37,15 +33,9 @@
 					<td>{{student.lastname}}</td>
 					<td>{{student.firstname}}</td>
 					<td>
-						<a class="btn btn-secondary" href="{{path('listEvaluation',{'id' : student.id,'idIntership':intership.id})}}">
-							Evaluer
-						</a>
+						<a class="btn btn-success" href="{{path('downloadFile',{'id':student.id})}}">Télécharger documents</a>
 					</td>
-					<td>
-						<a class="btn btn-success" href="{{path('endEvaluation',{'id':student.id,'idIntership':intership.id})}}">
-							Clôturer l'évaluation
-						</a>
-					</td>
+					
 				</tr>
 			</tbody>
 		{% endfor %}

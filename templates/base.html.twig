@@ -114,7 +114,7 @@ error: function () {}
 										<option {% if evaluation.position == 'Rapport' %} selected="selected" {% endif %} value="Rapport">Rapport</option>
 										<option {% if evaluation.position == 'Après stage' %} selected="selected" {% endif %} value="Après stage">Après stage</option>
 									</select>
-							<a class="btn btn-success" href="{{path('endEvaluation',{'id':evaluation.cotation[0].user.id,'idIntership':evaluation.cotation[0].intership.id})}}">Clôturer l'évaluation</a>
+							<a class="btn btn-success" href="{{path('endEvaluation',{'id':evaluation.id})}}">Clôturer l'évaluation</a>
 							{% endif %}
 							{% if app.request.get('_route') == "viewStudentEvaluation" %}
 							<a class="btn btn-success" href="{{path('sendMailToStudent',{'id':evaluation.id})}}"> Envoyer un mail à l'étudiant</a>

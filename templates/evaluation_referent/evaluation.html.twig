@@ -1,0 +1,227 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Évaluation de
+	{{evaluation.evaluations[0].cotation[0].user.lastname}}
+	{{evaluation.evaluations[0].cotation[0].user.firstname}}
+{% endblock %}
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<h1>
+				<u>
+					Évaluation de
+					{{evaluation.evaluations[0].cotation[0].user.lastname}}
+					{{evaluation.evaluations[0].cotation[0].user.firstname}}
+				</u>
+			</h1>
+
+Année académique :
+{{evaluation.evaluations[0].cotation[0].intership.ansco}}<br>
+				
+			
+                    {% for skill in skills%}
+<h2>{{skill.name}}</h2>
+
+				<table class="table table-striped">
+					<thead>
+						<td>Numéro de la compétence / sous-compétence</td>
+						<td>Nom de la compétence / sous-compétence</td>
+						<td>NA--</td>
+                        <td>NA-</td>
+                        <td>A+</td>
+                        <td>A++</td>
+					</thead>
+
+					<tbody>
+                        
+				        {% for subskill in skill.subskills %}
+							<tr>
+
+								<td>{{skill.skillNumber}}.{{subskill.number}}</td>
+								<td>
+									{{subskill.name}}</td>
+
+
+								<td>
+                                {% for evaluationItem in evaluation.evaluations %}
+                                    {% for cotationItem in evaluationItem.cotation%}
+                                        {% for subcotationItem in cotationItem.subskillcotation %}
+                                                {% if subskill == subcotationItem.subskill %}
+                                                
+                                                    {% if subcotationItem.cotation == 1 %}
+                                                        {{evaluationItem.user.lastname}} {{evaluationItem.user.firstname}}<br>
+                                                    {% endif %}{% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+								</td>
+                                <td>
+                                {% for evaluationItem in evaluation.evaluations %}
+                                    {% for cotationItem in evaluationItem.cotation%}
+                                        {% for subcotationItem in cotationItem.subskillcotation %}
+                                                {% if subskill == subcotationItem.subskill %}
+                                                
+                                                    {% if subcotationItem.cotation == 2 %}
+                                                        {{evaluationItem.user.lastname}} {{evaluationItem.user.firstname}}<br>
+                                                    {% endif %}{% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+								</td>
+                                <td>
+                                {% for evaluationItem in evaluation.evaluations %}
+                                    {% for cotationItem in evaluationItem.cotation%}
+                                        {% for subcotationItem in cotationItem.subskillcotation %}
+                                                {% if subskill == subcotationItem.subskill %}
+                                                
+                                                    {% if subcotationItem.cotation == 3 %}
+                                                        {{evaluationItem.user.lastname}} {{evaluationItem.user.firstname}}<br>
+                                                    {% endif %}{% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+								</td>
+                                <td>
+                                {% for evaluationItem in evaluation.evaluations %}
+                                    {% for cotationItem in evaluationItem.cotation%}
+                                        {% for subcotationItem in cotationItem.subskillcotation %}
+                                                {% if subskill == subcotationItem.subskill %}
+                                                
+                                                    {% if subcotationItem.cotation == 4 %}
+                                                        {{evaluationItem.user.lastname}} {{evaluationItem.user.firstname}}<br>
+                                                    {% endif %}{% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+								</td>
+							</tr>
+						{% endfor %}
+            
+					</tbody>
+				</table>
+                
+			{% endfor %}
+				<br>
+				
+
+					
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	{{parent()}}<script>
+
+		$(document).ready(function () { // When you change your cotation
+$("select").each(function () {
+$(this).change(function () {
+var subcotation = $(this).attr('id')
+var cotation = $(this).children("option:selected").val()
+$.ajax({
+url: "/evaluation",
+type: 'get',
+data: {
+'subSkillCotation': subcotation,
+'cotation': cotation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+
+})
+})
+
+// When you change your comments.
+
+$("textarea").each(function () {
+$(this).change(function () {
+	var cotation = $(this).attr('id')
+var comments = $(this).val()
+if($(this).attr('name')=="skillComments"){
+
+	$.ajax({
+		url: "/evaluationComments",
+		type: 'get',
+		data: {
+			'comments': comments,
+			'cotation': cotation
+		},
+		cache: false,
+		datatype: 'json',
+		success: function (data, status) {},
+		error: function () {}
+	});
+}
+else{
+	if($(this).attr('name')=="globalComments"){
+
+		$.ajax({
+			url: "/evaluationArchiveComments",
+			type: 'get',
+			data: {	
+				'comments': comments,
+				'evaluation': cotation
+			},
+			cache: false,
+			datatype: 'json',
+			success: function (data, status) {},
+			error: function () {}
+		});
+	}
+	else{
+		$.ajax({
+			url: "/evaluationNote",
+			type: 'get',
+			data: {
+				'comments': comments,
+				'evaluation': cotation
+			},
+			cache: false,
+			datatype: 'json',
+			success: function (data, status) {},
+			error: function () {}
+		});
+	}
+}
+})
+})
+
+// when you change the subject
+$("#textSubject").change(function () {
+var evaluation = $(this).attr('name')
+var value = $(this).val()
+$.ajax({
+url: "/evaluationArchiveSubject",
+type: 'get',
+data: {
+'subject': value,
+'evaluation': evaluation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+$("#date").change(function () {
+var evaluation = $(this).attr('name')
+var value = $(this).val()
+	$.ajax({
+url: "/evaluationArchiveDate",
+type: 'get',
+data: {
+'date': value,
+'evaluation': evaluation
+},
+cache: false,
+datatype: 'json',
+success: function (data, status) {},
+error: function () {}
+});
+})
+})
+	</script>
+{% endblock %}
